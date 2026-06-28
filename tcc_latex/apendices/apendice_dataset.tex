@@ -1,0 +1,272 @@
+% ==============================================================================
+% APÊNDICE B — Dataset do Experimento Controlado
+% ==============================================================================
+
+\chapter{Dataset do Experimento Controlado}
+\label{ap:dataset}
+
+Este apêndice apresenta o dataset completo dos 14 casos de teste utilizados no experimento controlado (OE6), incluindo expressões originais, gabaritos e resultados obtidos.
+
+\section{Estrutura do Dataset}
+
+O dataset foi armazenado em formato CSV com as seguintes colunas:
+
+\begin{itemize}
+    \item \textbf{id}: Identificador do caso de teste (ex: C1-01, C2-03)
+    \item \textbf{cenario}: Tipo de mudança (Renomeio de Coluna, Tabela ou Medida)
+    \item \textbf{descricao}: Descrição textual do caso de teste
+    \item \textbf{change\_type}: Tipo de mudança (rename\_column, rename\_table, rename\_measure)
+    \item \textbf{objeto}: Nome da medida ou coluna calculada impactada
+    \item \textbf{old\_name}: Nome antigo do objeto renomeado
+    \item \textbf{new\_name}: Nome novo do objeto renomeado
+    \item \textbf{provedor}: Provedor LLM utilizado (groq, openai, anthropic)
+    \item \textbf{modelo}: Modelo LLM específico (ex: llama-3.3-70b-versatile)
+    \item \textbf{expressao\_original}: Expressão DAX original (entrada)
+    \item \textbf{gabarito}: Expressão DAX esperada (gabarito)
+    \item \textbf{expressao\_gerada}: Expressão DAX gerada pelo LLM (saída)
+    \item \textbf{acuracia\_exata}: Booleano indicando se expressão gerada = gabarito
+    \item \textbf{acuracia\_parcial}: Score de similaridade (0.0 a 1.0)
+    \item \textbf{confianca\_llm}: Confiança estimada do LLM (0.0 a 1.0)
+    \item \textbf{tempo\_s}: Tempo de resposta do LLM em segundos
+    \item \textbf{erro}: Booleano indicando se houve erro de execução
+    \item \textbf{erro\_msg}: Mensagem de erro (se aplicável)
+\end{itemize}
+
+\section{Casos de Teste Completos}
+
+\subsection{Cenário 1: Renomeio de Coluna (7 casos)}
+
+\subsubsection{Caso C1-01: Medida Simples com SUM}
+
+\begin{itemize}
+    \item \textbf{Descrição}: Medida simples com SUM referenciando a coluna renomeada
+    \item \textbf{Mudança}: Renomear \texttt{Sales[Amount]} $\rightarrow$ \texttt{Sales[SalesAmount]}
+    \item \textbf{Expressão Original}:
+\end{itemize}
+
+\begin{verbatim}
+SUM(Sales[Amount])
+\end{verbatim}
+
+\begin{itemize}
+    \item \textbf{Gabarito}:
+\end{itemize}
+
+\begin{verbatim}
+SUM(Sales[SalesAmount])
+\end{verbatim}
+
+\begin{itemize}
+    \item \textbf{Expressão Gerada}: \texttt{SUM(Sales[SalesAmount])}
+    \item \textbf{Resultado}: ✅ Correto (acurácia = 100\%)
+    \item \textbf{Tempo}: 1.04s
+\end{itemize}
+
+\subsubsection{Caso C1-02: CALCULATE com Filtro}
+
+\begin{itemize}
+    \item \textbf{Mudança}: Renomear \texttt{Sales[Amount]} $\rightarrow$ \texttt{Sales[SalesAmount]}
+    \item \textbf{Expressão Original}:
+\end{itemize}
+
+\begin{verbatim}
+CALCULATE(SUM(Sales[Amount]), Sales[Channel] = "Online")
+\end{verbatim}
+
+\begin{itemize}
+    \item \textbf{Resultado}: ✅ Correto (acurácia = 100\%)
+    \item \textbf{Tempo}: 0.81s
+\end{itemize}
+
+\subsubsection{Caso C1-03: SUMX Iterador}
+
+\begin{itemize}
+    \item \textbf{Mudança}: Renomear \texttt{Sales[Amount]} $\rightarrow$ \texttt{Sales[SalesAmount]}
+    \item \textbf{Expressão Original}:
+\end{itemize}
+
+\begin{verbatim}
+SUMX(Sales, Sales[Amount] * Sales[Quantity])
+\end{verbatim}
+
+\begin{itemize}
+    \item \textbf{Resultado}: ✅ Correto (acurácia = 100\%)
+    \item \textbf{Tempo}: 7.30s
+\end{itemize}
+
+\subsubsection{Caso C1-04: Coluna Calculada}
+
+\begin{itemize}
+    \item \textbf{Mudança}: Renomear \texttt{Sales[Amount]} $\rightarrow$ \texttt{Sales[SalesAmount]}
+    \item \textbf{Expressão Original}:
+\end{itemize}
+
+\begin{verbatim}
+Sales[Amount] * 1.1
+\end{verbatim}
+
+\begin{itemize}
+    \item \textbf{Gabarito}: \texttt{Sales[SalesAmount] * 1.1}
+    \item \textbf{Expressão Gerada}: \texttt{'Sales'[SalesAmount] * 1.1}
+    \item \textbf{Resultado}: ❌ Incorreto (aspas desnecessárias)
+    \item \textbf{Tempo}: 0.32s
+\end{itemize}
+
+\subsubsection{Caso C1-05: DIVIDE}
+
+\begin{itemize}
+    \item \textbf{Resultado}: ❌ Incorreto (aspas desnecessárias)
+\end{itemize}
+
+\subsubsection{Caso C1-06: Time Intelligence Complexo}
+
+\begin{itemize}
+    \item \textbf{Expressão Original}:
+\end{itemize}
+
+\begin{verbatim}
+CALCULATE(
+    SUM(Sales[Amount]),
+    DATESYTD(Calendar[Date])
+)
+\end{verbatim}
+
+\begin{itemize}
+    \item \textbf{Resultado}: ✅ Correto (acurácia = 100\%)
+    \item \textbf{Tempo}: 23.29s (expressão mais longa)
+\end{itemize}
+
+\subsubsection{Caso C1-07: Múltiplas Referências em VARs}
+
+\begin{itemize}
+    \item \textbf{Expressão Original}:
+\end{itemize}
+
+\begin{verbatim}
+VAR CurrentSales = SUM(Sales[Amount])
+VAR PrevSales = CALCULATE(SUM(Sales[Amount]), 
+                          SAMEPERIODLASTYEAR(Calendar[Date]))
+RETURN
+    DIVIDE(CurrentSales - PrevSales, PrevSales)
+\end{verbatim}
+
+\begin{itemize}
+    \item \textbf{Resultado}: ✅ Correto (acurácia = 100\%)
+    \item \textbf{Tempo}: 0.36s
+\end{itemize}
+
+\subsection{Cenário 2: Renomeio de Tabela (4 casos)}
+
+\subsubsection{Caso C2-01: SUM Simples}
+
+\begin{itemize}
+    \item \textbf{Mudança}: Renomear \texttt{Sales} $\rightarrow$ \texttt{SalesData}
+    \item \textbf{Expressão Original}: \texttt{SUM(Sales[Amount])}
+    \item \textbf{Gabarito}: \texttt{SUM(SalesData[Amount])}
+    \item \textbf{Resultado}: ✅ Correto
+    \item \textbf{Tempo}: 0.21s (caso mais rápido do experimento)
+\end{itemize}
+
+\subsubsection{Caso C2-02: CALCULATE + FILTER}
+
+\begin{itemize}
+    \item \textbf{Resultado}: ✅ Correto
+\end{itemize}
+
+\subsubsection{Caso C2-03: COUNTROWS}
+
+\begin{itemize}
+    \item \textbf{Expressão Original}: \texttt{COUNTROWS(Sales)}
+    \item \textbf{Gabarito}: \texttt{COUNTROWS(SalesData)}
+    \item \textbf{Expressão Gerada}: (resposta inválida)
+    \item \textbf{Resultado}: ❌ Incorreto (LLM retornou resposta não-DAX)
+    \item \textbf{Tempo}: 0.31s
+    \item \textbf{Observação}: Expressão extremamente simples pode ter confundido o LLM
+\end{itemize}
+
+\subsubsection{Caso C2-04: SUMX + RELATED}
+
+\begin{itemize}
+    \item \textbf{Resultado}: ✅ Correto
+    \item \textbf{Tempo}: 9.33s
+\end{itemize}
+
+\subsection{Cenário 3: Renomeio de Medida (3 casos)}
+
+\subsubsection{Caso C3-01: Medida Simples}
+
+\begin{itemize}
+    \item \textbf{Mudança}: Renomear \texttt{[Total Sales]} $\rightarrow$ \texttt{[Total Revenue]}
+    \item \textbf{Expressão Original}: \texttt{[Total Sales] - [Total Cost]}
+    \item \textbf{Resultado}: ✅ Correto
+    \item \textbf{Tempo}: 22.28s
+\end{itemize}
+
+\subsubsection{Caso C3-02: CALCULATE com Medida}
+
+\begin{itemize}
+    \item \textbf{Resultado}: ✅ Correto
+\end{itemize}
+
+\subsubsection{Caso C3-03: DIVIDE com Medidas}
+
+\begin{itemize}
+    \item \textbf{Resultado}: ✅ Correto
+\end{itemize}
+
+\section{Resumo Estatístico do Dataset}
+
+\begin{table}[H]
+\centering
+\caption{Estatísticas do Dataset do Experimento}
+\label{tab:dataset_stats}
+\begin{tabular}{lc}
+\toprule
+\textbf{Métrica} & \textbf{Valor} \\
+\midrule
+Total de Casos & 14 \\
+Casos Corretos & 11 (78.6\%) \\
+Casos Incorretos & 3 (21.4\%) \\
+Tempo Médio de Resposta & 4.96s \\
+Tempo Mínimo & 0.21s (C2-01) \\
+Tempo Máximo & 23.29s (C1-06) \\
+Confiança Média do LLM & 92.86\% \\
+Taxa de Erro do Sistema & 0.0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Disponibilidade do Dataset}
+
+O dataset completo está disponível no repositório do projeto:
+
+\begin{itemize}
+    \item \textbf{CSV bruto}: \texttt{experiments/resultados/resultado\_20260505\_211431.csv}
+    \item \textbf{Resumo JSON}: \texttt{experiments/resultados/resultado\_20260505\_211431\_resumo.json}
+    \item \textbf{Análise}: \texttt{experiments/ANALISE\_RESULTADOS.md}
+\end{itemize}
+
+O repositório está publicado sob licença MIT em:
+
+\url{https://github.com/isabellamoura/pbi-refactor-agent}
+
+\section{Reprodutibilidade}
+
+Para reproduzir o experimento:
+
+\begin{verbatim}
+# Clonar repositório
+git clone https://github.com/isabellamoura/pbi-refactor-agent.git
+cd pbi-refactor-agent
+
+# Instalar dependências
+pip install -e ".[dev]"
+
+# Configurar API key (Groq é gratuito)
+echo "GROQ_API_KEY=sua_chave_aqui" > .env
+
+# Executar experimento
+python experiments/experimento_controlado.py
+\end{verbatim}
+
+Os resultados serão salvos em \texttt{experiments/resultados/} com timestamp único para rastreabilidade.

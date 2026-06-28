@@ -1,0 +1,2 @@
+[console_scripts]
+pbi-refactor = pbi_refactor_agent.cli:main
