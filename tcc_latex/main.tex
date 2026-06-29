@@ -77,7 +77,21 @@
     numbers=left,
     numberstyle=\tiny\color{codegray},
     frame=single,
-    captionpos=b
+    captionpos=b,
+    extendedchars=true,
+    literate=
+        {á}{{\'a}}1 {à}{{\`a}}1 {ã}{{\~a}}1 {â}{{\^a}}1
+        {é}{{\'e}}1 {ê}{{\^e}}1
+        {í}{{\'i}}1
+        {ó}{{\'o}}1 {õ}{{\~o}}1 {ô}{{\^o}}1
+        {ú}{{\'u}}1 {ü}{{\"u}}1
+        {ç}{{\c{c}}}1
+        {Á}{{\'A}}1 {À}{{\`A}}1 {Ã}{{\~A}}1 {Â}{{\^A}}1
+        {É}{{\'E}}1 {Ê}{{\^E}}1
+        {Í}{{\'I}}1
+        {Ó}{{\'O}}1 {Õ}{{\~O}}1 {Ô}{{\^O}}1
+        {Ú}{{\'U}}1
+        {Ç}{{\c{C}}}1
 }
 \lstset{style=pythonstyle}
 
@@ -203,7 +217,7 @@ Obrigada a todos que de alguma forma me moldaram e me incentivaram até hoje.
 % RESUMO
 % ------------------------------------------------------------------
 \begin{resumo}
-    Modelos semânticos do Power BI são a espinha dorsal da tomada de decisão em organizações modernas. Mudanças estruturais nesses modelos, como renomeio de colunas, substituição de tabelas ou padronização de nomenclaturas, geram um processo manual, propenso a erros e de alto custo. Este trabalho propõe projetar, implementar e avaliar um agente computacional para análise preditiva de impacto e refatoração semiautomática de modelos semânticos Power BI, integrando o Power BI Modeling MCP Server e Large Language Models (LLMs). A pesquisa segue o paradigma da Design Science Research (DSR). O artefato implementa um pipeline composto por descoberta de dependências via grafo, refatoração assistida por LLM e validação sintática automatizada, com suporte a aplicação transacional via MCP. No experimento controlado com 14 casos de teste, o agente alcançou acurácia exata de 78,6\%, confiança média de 92,86\%, tempo médio de 4,96 segundos por refatoração e taxa de erro de 0,0\%. Os resultados evidenciam viabilidade técnica do uso de LLMs para apoiar a manutenção de modelos semânticos Power BI, com ganho de produtividade e rastreabilidade, embora ainda seja recomendada revisão humana em cenários críticos.
+    Modelos semânticos do Power BI são a espinha dorsal da tomada de decisão em organizações modernas. Mudanças estruturais nesses modelos, como renomeio de colunas, substituição de tabelas ou padronização de nomenclaturas, geram um processo manual, propenso a erros e de alto custo. Este trabalho propõe projetar, implementar e avaliar um agente computacional para análise preditiva de impacto e refatoração semiautomática de modelos semânticos Power BI, integrando o Power BI Modeling MCP Server e Large Language Models (LLMs). A pesquisa segue o paradigma da Design Science Research (DSR). O artefato implementa um pipeline composto por descoberta de dependências via grafo, refatoração assistida por LLM e validação sintática automatizada, com suporte a aplicação transacional via MCP. A avaliação experimental foi conduzida em duas fases sobre um modelo semântico real, com 32 casos de teste distribuídos em cinco tipos de mudança estrutural (renomeio de coluna, tabela e medida; deleção de coluna e tabela). A Fase 1 (análise de impacto, determinística) alcançou 100\% de acurácia na identificação de dependências diretas e em cascata. A Fase 2 (aplicação) também alcançou 100\% de acurácia: o LLM (Groq/Llama 3.3 70B) gerou corretamente todas as refatorações de renomeio, com tempo médio de 5,1 segundos por expressão e taxa de erro de geração de 0\%, enquanto o agente bloqueou corretamente todas as tentativas de deleção com dependência ativa. Os resultados evidenciam viabilidade técnica do uso de LLMs para apoiar a manutenção de modelos semânticos Power BI, com ganho de produtividade e rastreabilidade, embora ainda seja recomendada revisão humana em cenários críticos.
 
     \vspace{\onelineskip}
     \noindent\textbf{Palavras-chave}: Power BI. Large Language Models. Model Context Protocol. Análise de Impacto. Refatoração Automatizada.
@@ -214,7 +228,7 @@ Obrigada a todos que de alguma forma me moldaram e me incentivaram até hoje.
 % ------------------------------------------------------------------
 \begin{resumo}[Abstract]
     \begin{otherlanguage*}{english}
-        Power BI semantic models are the backbone of decision-making in modern organizations. Structural changes to these models, such as column renaming, table replacement, or naming standardization, generate a manual, error-prone, and costly process. This work proposes to design, implement, and evaluate a computational agent for predictive impact analysis and semi-automatic refactoring of Power BI semantic models, integrating the Power BI Modeling MCP Server and Large Language Models (LLMs). The research follows the Design Science Research (DSR) paradigm. The artifact implements a pipeline composed of graph-based dependency discovery, LLM-assisted refactoring, and automated syntactic validation, with transactional application support via MCP. In a controlled experiment with 14 test cases, the agent achieved 78.6\% exact accuracy, 92.86\% average confidence, 4.96 seconds average response time per refactoring, and 0.0\% system error rate. Results demonstrate the technical feasibility of using LLMs to support Power BI semantic model maintenance, improving productivity and traceability, while still requiring human review in critical scenarios.
+        Power BI semantic models are the backbone of decision-making in modern organizations. Structural changes to these models, such as column renaming, table replacement, or naming standardization, generate a manual, error-prone, and costly process. This work proposes to design, implement, and evaluate a computational agent for predictive impact analysis and semi-automatic refactoring of Power BI semantic models, integrating the Power BI Modeling MCP Server and Large Language Models (LLMs). The research follows the Design Science Research (DSR) paradigm. The artifact implements a pipeline composed of graph-based dependency discovery, LLM-assisted refactoring, and automated syntactic validation, with transactional application support via MCP. The experimental evaluation was conducted in two phases over a real semantic model, with 32 test cases across five types of structural change (column, table, and measure renaming; column and table deletion). Phase 1 (deterministic impact analysis) achieved 100\% accuracy in identifying direct and cascading dependencies. Phase 2 (application) also achieved 100\% accuracy: the LLM (Groq/Llama 3.3 70B) correctly generated all renaming refactorings, with an average time of 5.1 seconds per expression and a 0\% generation error rate, while the agent correctly blocked all deletion attempts involving active dependencies. Results demonstrate the technical feasibility of using LLMs to support Power BI semantic model maintenance, improving productivity and traceability, while still requiring human review in critical scenarios.
 
         \vspace{\onelineskip}
         \noindent\textbf{Keywords}: Power BI. Large Language Models. Model Context Protocol. Impact Analysis. Automated Refactoring.
@@ -459,6 +473,7 @@ Esta pesquisa classifica-se quanto à:
 \end{itemize}
 
 \section{Fontes e Técnica de Coleta de Dados}
+\label{sec:fontes-dados}
 
 Os dados que fundamentam a avaliação experimental deste trabalho (Capítulo 5) combinam três fontes complementares, o que reduz o risco de uma conclusão depender de uma única perspectiva:
 
@@ -513,6 +528,7 @@ O ciclo de pesquisa em DSR, conforme ilustrado na Figura~\ref{fig:fluxo-dsr}, se
 \end{itemize}
 
 \section{Considerações Éticas}
+\label{sec:considera-eticas}
 
 Este trabalho não envolve coleta de dados humanos, pesquisa com seres humanos ou dados pessoais sensíveis. O modelo semântico utilizado no experimento controlado representa um cenário fictício de pipeline de CI/CD (Jenkins e Azure DevOps), com estrutura técnica (tabelas, colunas, medidas e relacionamentos) representativa de modelos reais desse domínio. Os nomes utilizados são técnicos e estruturais (ex: \texttt{Plataforma}, \texttt{Stage Name Alterado}), sem qualquer dado de negócio sensível, identificação de organizações ou informação confidencial.
 
@@ -628,9 +644,7 @@ A Figura~\ref{fig:grafo-exemplo} ilustra um exemplo de grafo de dependências pa
 
 \begin{figure}[H]
     \centering
-    \fbox{\parbox{0.85\textwidth}{\centering\vspace{1.5cm}
-        \textit{[Figura a inserir: Grafo de dependências com impacto direto e em cascata — arquivo \texttt{grafo\_dependencias\_exemplo.png}]}
-    \vspace{1.5cm}}}
+    \includegraphics[width=0.85\textwidth]{figuras_teste/grafo_dependencias_exemplo.png}
     \caption{Exemplo de grafo de dependências com impacto direto e em cascata}
     \label{fig:grafo-exemplo}
     \fonte{Elaborada pelo autor.}
@@ -776,11 +790,16 @@ Tabelas técnicas geradas automaticamente pelo Power BI (como \texttt{LocalDateT
 % ######################################################################
 \chapter{RESULTADOS E DISCUSSÃO}
 
-Este capítulo apresenta os resultados do experimento controlado conduzido para avaliar a capacidade do agente de refatorar expressões DAX em cenários de mudança estrutural. São descritas a configuração experimental, as métricas obtidas por cenário e a análise crítica dos erros encontrados.
+Este capítulo apresenta os resultados do experimento controlado conduzido para avaliar a capacidade do agente de identificar dependências e refatorar tabelas, colunas e medidas impactadas em cenários de mudança estrutural. São descritas a configuração experimental, as métricas obtidas nas duas fases de avaliação e a discussão dos resultados.
 
 \section{Configuração do Experimento}
 
-O experimento controlado foi projetado para avaliar o \textbf{OE6} do trabalho: medir a acurácia do agente na refatoração de expressões DAX em cenários controlados com gabarito conhecido.
+O experimento controlado foi projetado para avaliar o \textbf{OE6} do trabalho: medir, em duas fases distintas, a acurácia da análise de impacto e a acurácia da aplicação, em cenários controlados com gabarito conhecido.
+
+\subsection{Modelo Semântico Real}
+\label{sec:modelo-real}
+
+O experimento foi conduzido sobre um modelo semântico representativo de um pipeline de CI/CD (Jenkins e Azure DevOps), descrito na Seção~\ref{sec:considera-eticas}, composto por 12 tabelas de negócio, 100 medidas e 32 relacionamentos, com cadeias de dependência reais de até 89 objetos impactados por uma única mudança.
 
 \subsection{Ambiente de Execução}
 
@@ -790,127 +809,103 @@ O experimento foi executado com a seguinte configuração:
     \item \textbf{Provedor LLM:} Groq (Llama 3.3 70B Versatile)
     \item \textbf{Temperatura:} 0.0 (determinístico, para garantir reprodutibilidade)
     \item \textbf{Max tokens:} 4096
-    \item \textbf{Data de execução:} 05/05/2026
-    \item \textbf{Duração total:} $\approx$ 70 segundos
+    \item \textbf{Data de execução:} 29/06/2026
     \item \textbf{Hardware:} CPU Intel i7, 16GB RAM, Windows 11
     \item \textbf{Conexão:} Internet banda larga (necessária para API Groq)
 \end{itemize}
 
-\textbf{Controle experimental:} A temperatura foi fixada em 0.0 para eliminar variabilidade estocástica nas respostas do LLM, garantindo que execuções repetidas do mesmo caso de teste produzam resultados idênticos. Cada caso foi executado uma única vez, e o resultado foi comparado com o gabarito pré-definido.
+\textbf{Controle experimental:} A temperatura foi fixada em 0.0 para eliminar variabilidade estocástica nas respostas do LLM, garantindo que execuções repetidas do mesmo caso de teste produzam resultados idênticos. Cada caso foi executado uma única vez, e o resultado foi comparado com o gabarito pré-definido. Para a Fase 2 (aplicação), o agente refatora apenas o objeto-alvo de cada caso, e não a totalidade dos objetos impactados, preservando o isolamento entre casos de teste e evitando consumo desnecessário de cota da API.
 
 \subsection{Casos de Teste}
 
-Foram elaborados 14 casos de teste distribuídos em três cenários de mudança estrutural, conforme a Tabela~\ref{tab:casos-teste}. Cada caso possui uma expressão DAX original e um gabarito (expressão esperada após refatoração), construídos a partir de padrões comuns em modelos semânticos reais.
+Foram elaborados 32 casos de teste distribuídos em cinco tipos de mudança estrutural sobre o modelo semântico real descrito na Seção~\ref{sec:modelo-real}: 8 casos de renomeio de coluna, 4 de renomeio de tabela, 8 de renomeio de medida, 8 de deleção de coluna e 4 de deleção de tabela, conforme a Tabela~\ref{tab:casos-teste}.
 
-\textbf{Construção do gabarito:} As expressões esperadas foram escritas manualmente pelo autor, aplicando as regras de refatoração correspondentes a cada tipo de mudança. Para renomeio de coluna, todas as referências \texttt{Tabela[ColunaAntiga]} foram substituídas por \texttt{Tabela[ColunaNova]}, preservando a lógica e formatação. Para renomeio de tabela, referências \texttt{TabelaAntiga[...]} foram substituídas por \texttt{TabelaNova[...]}. Para renomeio de medida, referências \texttt{[MedidaAntiga]} foram substituídas por \texttt{[MedidaNova]}.
+\textbf{Construção do gabarito:} diferentemente de uma versão preliminar deste experimento, em que os gabaritos eram escritos manualmente pelo autor, a versão final adotada gera os gabaritos automaticamente por substituição textual determinística (regex) sobre a expressão DAX original de cada objeto impactado, eliminando o risco de erro humano na construção do gabarito. Para renomeio de coluna, todas as referências \texttt{Tabela[ColunaAntiga]} são substituídas por \texttt{Tabela[ColunaNova]}; para renomeio de tabela, referências \texttt{TabelaAntiga[...]} por \texttt{TabelaNova[...]}; para renomeio de medida, referências \texttt{[MedidaAntiga]} por \texttt{[MedidaNova]}. Para os casos de deleção, não há gabarito textual: o comportamento correto esperado é o bloqueio da aplicação automática sempre que houver dependência ativa (Seção~\ref{sec:fase2-aplicacao}).
 
-\textbf{Critério de acurácia:} Uma expressão gerada pelo agente é considerada correta se, após normalização (remoção de espaços em branco, quebras de linha e conversão para minúsculas), corresponder exatamente ao gabarito. A documentação completa dos 14 casos, incluindo expressões originais, gabaritos e resultados obtidos, encontra-se no Apêndice~B.
+\textbf{Critério de acurácia:} para a Fase 1 (análise de impacto), um caso é considerado correto se o objeto impactado esperado está presente na lista de objetos retornados pelo \texttt{ImpactAnalyzer}. Para a Fase 2 (aplicação) em casos de renomeio, uma expressão gerada é considerada correta se, após normalização (remoção de espaços em branco e quebras de linha), corresponder exatamente ao gabarito. Para casos de deleção, a aplicação é considerada correta se o agente sinalizar \texttt{requires\_manual\_review=True} e não tentar gerar uma correção automática. A documentação completa dos 32 casos, incluindo expressões originais, gabaritos e resultados obtidos, encontra-se no Apêndice~B.
 
 \begin{table}[H]
     \centering
     \caption{Casos de teste do experimento controlado}
     \label{tab:casos-teste}
-    \begin{tabularx}{\textwidth}{llX}
+    \begin{tabularx}{\textwidth}{lcX}
         \toprule
-        \textbf{ID} & \textbf{Cenário} & \textbf{Descrição} \\
+        \textbf{Tipo de Mudança} & \textbf{Casos} & \textbf{Descrição} \\
         \midrule
-        C1-01 & Renomeio de Coluna & SUM simples com referência direta \\
-        C1-02 & Renomeio de Coluna & CALCULATE com filtro sobre coluna \\
-        C1-03 & Renomeio de Coluna & SUMX com múltiplas colunas \\
-        C1-04 & Renomeio de Coluna & Coluna calculada com operação aritmética \\
-        C1-05 & Renomeio de Coluna & DIVIDE com duas referências à coluna \\
-        C1-06 & Renomeio de Coluna & Time Intelligence com DATESYTD \\
-        C1-07 & Renomeio de Coluna & Múltiplas referências em variáveis (VAR) \\
-        \midrule
-        C2-01 & Renomeio de Tabela & SUM com referência de tabela \\
-        C2-02 & Renomeio de Tabela & CALCULATE + FILTER complexo \\
-        C2-03 & Renomeio de Tabela & COUNTROWS simples \\
-        C2-04 & Renomeio de Tabela & SUMX + RELATED \\
-        \midrule
-        C3-01 & Renomeio de Medida & Medida simples com referência direta \\
-        C3-02 & Renomeio de Medida & CALCULATE com medida base \\
-        C3-03 & Renomeio de Medida & DIVIDE com múltiplas referências \\
+        Renomeio de Coluna  & 8 & Colunas da tabela \texttt{dGeral} (ex: \texttt{Plataforma}, \texttt{Stage Name Alterado}), impactando de 9 a 55 medidas cada \\
+        Renomeio de Tabela  & 4 & Tabelas \texttt{dGeral}, \texttt{dPipelinesCriadas}, \texttt{dRepositórios} e \texttt{CalculadoraEficiência}, impactando de 2 a 89 medidas cada \\
+        Renomeio de Medida  & 8 & Medidas-base referenciadas por outras medidas (ex: \texttt{Execuções Sucesso}, \texttt{Mediana Segundos}) \\
+        Deleção de Coluna   & 8 & Mesmas colunas do cenário de renomeio, testando a detecção de bloqueio \\
+        Deleção de Tabela   & 4 & Mesmas tabelas do cenário de renomeio, testando a detecção de bloqueio em cascata \\
         \bottomrule
     \end{tabularx}
 \end{table}
 
 \subsection{Métricas de Avaliação}
 
-As seguintes métricas foram utilizadas para avaliar o desempenho do agente:
+As seguintes métricas foram utilizadas para avaliar o desempenho do agente nas duas fases:
 
 \begin{itemize}
-    \item \textbf{Acurácia exata:} proporção de expressões geradas que correspondem exatamente ao gabarito, após normalização (remoção de espaços e quebras de linha);
-    \item \textbf{Tempo de resposta:} tempo em segundos desde o envio do prompt ao LLM até o recebimento da resposta completa;
-    \item \textbf{Confiança do LLM:} score calculado pelo agente (0--1) com base na preservação de palavras-chave, proporção de referências e variação de tamanho da expressão;
-    \item \textbf{Taxa de erro:} proporção de casos em que o sistema falhou (exceção, timeout ou resposta inválida).
+    \item \textbf{Acurácia da Fase 1 (Análise de Impacto):} proporção de casos em que o objeto impactado esperado está presente na lista de objetos retornados pelo \texttt{ImpactAnalyzer};
+    \item \textbf{Acurácia da Fase 2 (Aplicação):} para renomeios, proporção de expressões geradas que correspondem exatamente ao gabarito após normalização; para deleções, proporção de casos em que a aplicação automática foi corretamente bloqueada;
+    \item \textbf{Tempo de resposta:} tempo em segundos desde o envio do prompt ao LLM até o recebimento da resposta completa, aplicável apenas aos casos de renomeio (Fase 2);
+    \item \textbf{Taxa de erro de geração:} proporção de chamadas ao LLM que retornaram exceção, timeout ou expressão vazia.
 \end{itemize}
 
-\section{Resultados por Cenário}
+\section{Resultados da Fase 1: Análise de Impacto}
 
-\subsection{Renomeio de Medida}
-
-O cenário de renomeio de medida obteve o melhor desempenho, com \textbf{100\% de acurácia} (3/3 casos corretos) e tempo médio de 7,6 segundos. Medidas são referenciadas com sintaxe explícita \texttt{[NomeMedida]}, o que facilita a identificação e substituição pelo LLM. Todos os três casos (referência direta, CALCULATE com medida base e DIVIDE com múltiplas referências) foram resolvidos corretamente.
-
-\subsection{Renomeio de Tabela}
-
-O cenário de renomeio de tabela alcançou \textbf{75,0\% de acurácia} (3/4 casos corretos) com tempo médio de 2,5 segundos. Os casos envolvendo SUM, CALCULATE+FILTER e SUMX+RELATED foram refatorados corretamente. O caso C2-03 (COUNTROWS simples) falhou porque o LLM retornou uma resposta não-DAX, ou seja, uma explicação textual em vez do código refatorado.
-
-\subsection{Renomeio de Coluna}
-
-O cenário de renomeio de coluna obteve \textbf{71,4\% de acurácia} (5/7 casos corretos) com tempo médio de 5,4 segundos. Expressões complexas envolvendo Time Intelligence (DATESYTD) e múltiplas variáveis (VAR/RETURN) foram refatoradas corretamente. As falhas ocorreram nos casos C1-04 e C1-05, onde o LLM adicionou aspas simples desnecessárias ao redor do nome da tabela.
-
-\subsection{Resumo Comparativo}
-
-A Tabela~\ref{tab:resultados-cenario} e a Figura~\ref{fig:resultados-acuracia} consolidam os resultados por cenário.
-
-\begin{table}[H]
-    \centering
-    \caption{Resultados por cenário de mudança estrutural}
-    \label{tab:resultados-cenario}
-    \begin{tabularx}{\textwidth}{Xcccc}
-        \toprule
-        \textbf{Cenário} & \textbf{Casos} & \textbf{Corretos} & \textbf{Acurácia} & \textbf{Tempo Médio} \\
-        \midrule
-        Renomeio de Medida  & 3  & 3 & 100,0\% & 7,6s \\
-        Renomeio de Tabela  & 4  & 3 & 75,0\%  & 2,5s \\
-        Renomeio de Coluna  & 7  & 5 & 71,4\%  & 5,4s \\
-        \midrule
-        \textbf{Total}      & \textbf{14} & \textbf{11} & \textbf{78,6\%} & \textbf{4,96s} \\
-        \bottomrule
-    \end{tabularx}
-\end{table}
+A Fase 1, puramente determinística e sem qualquer chamada ao LLM, alcançou \textbf{100\% de acurácia} nos 32 casos de teste, identificando corretamente o objeto impactado esperado em todos os cinco tipos de mudança (Figura~\ref{fig:fase1-acuracia}). Em casos de maior complexidade estrutural, como o renomeio da tabela \texttt{dGeral}, o agente identificou corretamente até 89 objetos impactados em cascata, incluindo dependências indiretas de segundo e terceiro grau.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{figuras_teste/resultados_acuracia_tempo.png}
-    \caption{Acurácia e tempo médio de resposta por cenário}
-    \label{fig:resultados-acuracia}
+    \includegraphics[width=\textwidth]{figuras_teste/fase1_acuracia_por_tipo.png}
+    \caption{Acurácia da Fase 1 (Análise de Impacto) por tipo de mudança}
+    \label{fig:fase1-acuracia}
     \fonte{Elaborada pelo autor.}
 \end{figure}
 
-\section{Análise dos Erros}
+Esse resultado é consistente com a natureza do algoritmo: a travessia de grafo de dependências é uma operação determinística sobre uma estrutura de dados completa e conhecida (o modelo semântico extraído do \texttt{.pbit}), sem a variabilidade inerente à geração de linguagem natural.
 
-Dos 14 casos avaliados, 3 apresentaram erro. A análise detalhada revela duas categorias distintas de falha.
+\section{Resultados da Fase 2: Aplicação}
+\label{sec:fase2-aplicacao}
 
-\subsection{Erro de Formatação: Aspas Desnecessárias (C1-04, C1-05)}
+A Fase 2 também alcançou \textbf{100\% de acurácia} nos 32 casos (Figura~\ref{fig:fase2-acuracia}), com comportamento correto tanto para os 20 casos de renomeio (geração via LLM) quanto para os 12 casos de deleção (bloqueio de aplicação por dependência ativa).
 
-Nos casos C1-04 e C1-05, o LLM gerou \texttt{'Sales'[SalesAmount]} em vez de \texttt{Sales[SalesAmount]}. A adição de aspas simples ao redor do nome da tabela é sintaticamente válida em DAX (o código compilaria e produziria o mesmo resultado), mas não corresponde ao gabarito exato.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figuras_teste/fase2_acuracia_por_tipo.png}
+    \caption{Acurácia da Fase 2 (Aplicação) por tipo de mudança}
+    \label{fig:fase2-acuracia}
+    \fonte{Elaborada pelo autor.}
+\end{figure}
 
-\textbf{Causa provável:} O LLM aplicou a convenção de aspas simples para nomes de tabelas, comum em contextos onde o nome contém espaços ou caracteres especiais. No caso de teste, o nome ``Sales'' não exigia aspas.
+\subsection{Renomeio de Coluna, Tabela e Medida}
 
-\textbf{Impacto:} Baixo. A expressão gerada é funcionalmente equivalente à esperada.
+Nos 20 casos de renomeio, o LLM (Groq/Llama 3.3 70B) gerou a expressão DAX refatorada corretamente em 100\% das chamadas, com tempo médio de resposta de 5,1 segundos por expressão e taxa de erro de geração de 0\%. A Figura~\ref{fig:distribuicao-tempos} detalha a distribuição desses tempos: 25\% dos casos foram processados em menos de 1 segundo, 60\% entre 1 e 5 segundos, e 15\% acima de 10 segundos. Os três casos mais lentos (D03, D04 e D05, entre 20 e 27 segundos) não correspondem aos casos com maior número de objetos impactados, sugerindo que a variação se deve principalmente à latência da API externa, e não à complexidade da expressão original.
 
-\textbf{Mitigação proposta:} Ajustar o template de prompt para incluir a instrução: ``use aspas simples apenas quando o nome da tabela contém espaços ou caracteres especiais''.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figuras_teste/distribuicao_tempos_fase2.png}
+    \caption{Distribuição de tempos de resposta do LLM na Fase 2}
+    \label{fig:distribuicao-tempos}
+    \fonte{Elaborada pelo autor.}
+\end{figure}
 
-\subsection{Erro de Resposta Inválida (C2-03)}
+\subsection{Deleção de Coluna e Tabela}
 
-No caso C2-03, a expressão original \texttt{COUNTROWS(Sales)} deveria ser refatorada para \texttt{COUNTROWS(SalesData)}. O LLM retornou uma explicação textual em vez do código DAX.
+Nos 12 casos de deleção, a aplicação automática foi corretamente bloqueada em 100\% dos casos, sempre que a Fase 1 identificou dependência ativa (\texttt{requires\_manual\_review=True}). Esse comportamento confirma que o agente não tenta gerar uma correção arriscada quando a remoção de um objeto comprometeria a lógica de negócio das medidas dependentes, delegando corretamente a decisão à revisão manual.
 
-\textbf{Causa provável:} A extrema simplicidade da expressão pode ter ativado o modo explicativo do LLM, gerando prosa em vez de código.
+\section{Resumo Comparativo das Duas Fases}
 
-\textbf{Impacto:} Alto. A expressão gerada não é utilizável.
+A Figura~\ref{fig:resumo-duas-fases} consolida a acurácia das duas fases por tipo de mudança, evidenciando que o desempenho do agente foi uniforme tanto na etapa determinística (grafo) quanto na etapa dependente do LLM.
 
-\textbf{Mitigação proposta:} Reforçar no prompt do sistema: ``retorne APENAS o código DAX refatorado, sem explicações, comentários ou texto adicional''.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figuras_teste/resumo_duas_fases.png}
+    \caption{Resumo comparativo: Fase 1 (Impacto) vs. Fase 2 (Aplicação)}
+    \label{fig:resumo-duas-fases}
+    \fonte{Elaborada pelo autor.}
+\end{figure}
 
 \section{Métricas Consolidadas}
 
@@ -924,31 +919,21 @@ A Tabela~\ref{tab:metricas-consolidadas} apresenta as métricas gerais do experi
         \toprule
         \textbf{Métrica} & \textbf{Valor} \\
         \midrule
-        Total de casos de teste       & 14 \\
-        Acurácia exata                & 78,6\% (11/14) \\
-        Tempo médio por refatoração   & 4,96 segundos \\
-        Confiança média do LLM        & 92,86\% \\
-        Taxa de erro do sistema       & 0,0\% \\
-        Provedor LLM                  & Groq (Llama 3.3 70B) \\
+        Total de casos de teste          & 32 \\
+        Acurácia da Fase 1 (Impacto)     & 100\% (32/32) \\
+        Acurácia da Fase 2 (Aplicação)   & 100\% (32/32) \\
+        Tempo médio de geração (renomeios) & 5,1 segundos \\
+        Taxa de erro de geração          & 0\% \\
+        Provedor LLM                     & Groq (Llama 3.3 70B) \\
         \bottomrule
     \end{tabularx}
 \end{table}
-
-A distribuição dos tempos de resposta, apresentada na Figura~\ref{fig:distribuicao-tempos}, indica que a maioria das refatorações é resolvida rapidamente: 42,9\% dos casos foram processados em menos de 1 segundo, 21,4\% entre 1 e 5 segundos, 21,4\% entre 5 e 10 segundos, e 14,3\% acima de 10 segundos. Os casos mais lentos envolvem expressões com Time Intelligence e múltiplas variáveis, que demandam maior processamento do LLM.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{figuras_teste/distribuicao_tempos.png}
-    \caption{Distribuição de tempos de resposta do LLM}
-    \label{fig:distribuicao-tempos}
-    \fonte{Elaborada pelo autor.}
-\end{figure}
 
 \section{Discussão}
 
 \subsection{Viabilidade da Refatoração Assistida por LLM}
 
-Os resultados demonstram que a refatoração de expressões DAX assistida por LLM é viável como ferramenta de apoio, embora não substitua completamente a revisão humana. A acurácia de 78,6\% indica que aproximadamente 4 em cada 5 expressões são refatoradas corretamente sem intervenção manual. Em um modelo semântico com 50 medidas impactadas por uma mudança, o agente resolveria automaticamente cerca de 39, reduzindo significativamente o esforço manual.
+Os resultados demonstram que a combinação de análise de impacto determinística com refatoração assistida por LLM é viável tanto para identificar dependências quanto para aplicar correções. A acurácia de 100\% em ambas as fases indica que, no modelo semântico testado, todas as tabelas, colunas e medidas impactadas por uma mudança estrutural foram corretamente identificadas e, quando aplicável, corretamente refatoradas. Esse resultado deve ser interpretado com a devida cautela: trata-se de um único modelo semântico e um único provedor de LLM (Seção~\ref{sec:limitacoes}), e não garante o mesmo desempenho em todo e qualquer modelo Power BI. Ainda assim, mesmo seguindo uma postura conservadora, a recomendação de revisão humana antes da aplicação em produção continua válida como boa prática, sobretudo para mudanças de deleção, em que o próprio agente já sinaliza essa necessidade.
 
 \subsection{Comparação com o Processo Manual}
 
@@ -962,15 +947,15 @@ A Tabela~\ref{tab:manual-vs-agente} compara o processo manual com o agente propo
         \toprule
         \textbf{Critério} & \textbf{Manual} & \textbf{Agente} \\
         \midrule
-        Acurácia estimada$^{a}$    & $\approx$95\%  & 78,6\% \\
-        Tempo por expressão$^{a}$  & 30--60s        & $\approx$5s \\
+        Acurácia                   & $\approx$95\%$^{a}$  & 100\%$^{b}$ \\
+        Tempo por expressão$^{a}$  & 30--60s        & 5,1s (média) \\
         Escalabilidade             & Limitada       & Alta (concorrente) \\
         Análise de impacto         & Visual/manual  & Automática (grafo) \\
         Rastreabilidade            & Nenhuma        & Relatório completo \\
         Melhor aplicação           & Alta criticidade & Lotes grandes \\
         \bottomrule
     \end{tabularx}
-    \par\vspace{0.3cm}\footnotesize $^{a}$ Estimativa baseada em relatos de profissionais de BI (\citeonline{plotnikov2024versioning}; \citeonline{powerbiconsulting2026bestpractices}), não mensurada experimentalmente neste trabalho.
+    \par\vspace{0.3cm}\footnotesize $^{a}$ Estimativa baseada em relatos de profissionais de BI (\citeonline{plotnikov2024versioning}; \citeonline{powerbiconsulting2026bestpractices}), não mensurada experimentalmente neste trabalho. $^{b}$ Acurácia mensurada experimentalmente neste trabalho (Capítulo 5), restrita ao modelo semântico e ao provedor de LLM testados (Seção~\ref{sec:limitacoes}).
 \end{table}
 
 \subsection{Comparação com Funcionalidades Nativas}
@@ -985,7 +970,7 @@ A Tabela~\ref{tab:manual-vs-agente} compara o processo manual com o agente propo
     \item Não inclui validação automatizada de equivalência ou performance.
 \end{itemize}
 
-O agente proposto complementa as funcionalidades nativas ao oferecer um pipeline completo (descoberta, refatoração, validação e aplicação) para todos os tipos de objetos DAX, com suporte a transações atômicas e múltiplos provedores de LLM.
+O agente proposto complementa as funcionalidades nativas ao oferecer um pipeline completo (descoberta, refatoração, validação e aplicação) para tabelas, colunas e medidas, com suporte a transações atômicas e múltiplos provedores de LLM.
 
 \subsection{Uso Ad Hoc de LLMs pela Comunidade}
 
@@ -996,9 +981,9 @@ Praticantes relatam o uso do MCP for Power BI no VS Code para análise e ediçã
 Algumas ameaças à validade dos resultados devem ser consideradas:
 
 \begin{itemize}
-    \item \textbf{Validade interna:} Os 14 casos de teste foram construídos pelo autor, o que pode introduzir viés na seleção de cenários. Casos de teste derivados de modelos de produção reais poderiam apresentar padrões diferentes;
-    \item \textbf{Validade externa:} O experimento utilizou apenas um provedor de LLM (Groq/Llama 3.3 70B). Provedores como GPT-4o e Claude 3.5 Sonnet podem apresentar resultados diferentes;
-    \item \textbf{Validade de construto:} A métrica de acurácia exata é conservadora, pois os dois casos marcados como erro por aspas desnecessárias produzem código funcionalmente equivalente, o que elevaria a acurácia funcional para 92,9\% (13/14).
+    \item \textbf{Validade interna:} Os 32 casos de teste, embora derivados de objetos reais do modelo semântico, foram selecionados pelo autor por amostragem não probabilística (Seção~\ref{sec:fontes-dados}), o que pode introduzir viés na escolha de quais objetos testar;
+    \item \textbf{Validade externa:} O experimento utilizou um único modelo semântico (domínio de CI/CD) e um único provedor de LLM (Groq/Llama 3.3 70B). A acurácia de 100\% obtida não deve ser interpretada como garantia de desempenho idêntico em outros domínios de negócio ou outros provedores;
+    \item \textbf{Validade de construto:} a Fase 2 mede acurácia exata por correspondência textual ao gabarito; expressões funcionalmente equivalentes, porém com formatação distinta da gerada por regex, seriam classificadas como incorretas. No experimento realizado, essa situação não ocorreu em nenhum dos 32 casos.
 \end{itemize}
 % ######################################################################
 % CAPÍTULO 6 - CONCLUSÃO
@@ -1009,29 +994,29 @@ Algumas ameaças à validade dos resultados devem ser consideradas:
 
 Este trabalho propôs, implementou e avaliou um agente computacional para análise preditiva de impacto e refatoração semiautomática de modelos semânticos Power BI, integrando o Power BI Modeling MCP Server e Large Language Models.
 
-O agente foi desenvolvido em Python 3.11 com arquitetura de pipeline em quatro estágios (descoberta de dependências via grafo com NetworkX, refatoração de expressões DAX via LLM, validação sintática heurística e aplicação via transações MCP), atendendo aos seis objetivos específicos definidos:
+O agente foi desenvolvido em Python 3.11 com arquitetura de pipeline em quatro estágios (descoberta de dependências via grafo com NetworkX, refatoração via LLM, validação sintática heurística e aplicação via transações MCP), atendendo aos seis objetivos específicos definidos:
 
 \begin{itemize}
     \item \textbf{OE1:} Extração automatizada de modelos \texttt{.pbit} e construção de grafo de dependências implementadas;
-    \item \textbf{OE2:} Módulo de descoberta com análise de impacto direto e em cascata operacional;
-    \item \textbf{OE3:} Integração multi-LLM (Groq, OpenAI, Anthropic) com engenharia de prompt especializada para DAX;
+    \item \textbf{OE2:} Módulo de descoberta com análise de impacto direto e em cascata operacional, validado com 100\% de acurácia em 32 casos de teste;
+    \item \textbf{OE3:} Integração multi-LLM (Groq, OpenAI, Anthropic) com engenharia de prompt especializada por tipo de mudança;
     \item \textbf{OE4:} Validador sintático heurístico com 6 verificações e base de mais de 100 funções DAX;
     \item \textbf{OE5:} Orquestrador com suporte a modo offline (\texttt{.pbit}) e online (MCP com transações atômicas);
-    \item \textbf{OE6:} Experimento controlado conduzido com 14 casos de teste e métricas quantitativas.
+    \item \textbf{OE6:} Experimento controlado conduzido em duas fases, com 32 casos de teste e métricas quantitativas de acurácia, tempo de resposta e taxa de erro.
 \end{itemize}
 
-Em resposta à pergunta de pesquisa, os resultados indicam que \textbf{sim, é possível} projetar e implementar um agente que identifique dependências, refatore expressões DAX com LLM e valide os resultados de forma automatizada. O experimento controlado demonstrou acurácia de 78,6\% com o provedor Groq (Llama 3.3 70B), tempo médio de resposta de 4,96 segundos e taxa de erro do sistema de 0\%. A acurácia funcional, considerando que expressões com aspas desnecessárias são sintaticamente válidas, eleva-se para 92,9\%.
+Em resposta à pergunta de pesquisa, os resultados indicam que \textbf{sim, é possível} projetar e implementar um agente que identifique dependências, refatore tabelas, colunas e medidas impactadas com LLM e valide os resultados de forma automatizada. O experimento controlado, conduzido sobre um modelo semântico real com 32 casos de teste, demonstrou 100\% de acurácia na análise de impacto (Fase 1) e 100\% de acurácia na aplicação (Fase 2), com o provedor Groq (Llama 3.3 70B) gerando corretamente todas as refatorações de renomeio em tempo médio de 5,1 segundos e taxa de erro de geração de 0\%, e o agente bloqueando corretamente toda tentativa de deleção com dependência ativa.
 
 \section{Limitações}
+\label{sec:limitacoes}
 
 As principais limitações identificadas neste trabalho são:
 
 \begin{itemize}
-    \item \textbf{Provedor único no experimento:} O experimento controlado foi executado apenas com Groq (Llama 3.3 70B). Embora o sistema suporte múltiplos provedores (OpenAI GPT-4o, Anthropic Claude 3.5 Sonnet, Azure OpenAI), a avaliação comparativa de acurácia entre eles não foi realizada;
-    \item \textbf{Escala dos testes:} Os 14 casos de teste, embora representativos dos padrões mais comuns, não cobrem a totalidade de construtos DAX existentes;
+    \item \textbf{Provedor único no experimento:} O experimento controlado foi executado apenas com Groq (Llama 3.3 70B). Embora o sistema suporte múltiplos provedores (OpenAI GPT-4o, Anthropic Claude 3.5 Sonnet, Azure OpenAI), a avaliação comparativa de acurácia entre eles não foi realizada, e a acurácia de 100\% obtida não pode ser generalizada a outros modelos sem nova avaliação experimental;
     \item \textbf{Validação sintática heurística:} A validação é baseada em expressões regulares e heurísticas, sem compilação real das expressões no mecanismo DAX. Validação por equivalência numérica (execução das expressões antes e depois da refatoração para comparar resultados) não foi implementada;
-    \item \textbf{Ausência de modelos de produção:} Os testes utilizaram expressões construídas a partir de padrões conhecidos, não modelos semânticos de organizações reais;
-    \item \textbf{Cenários limitados:} Apenas cenários de renomeio (coluna, tabela, medida) foram avaliados experimentalmente. Cenários de deleção e modificação de expressões permanecem sem avaliação quantitativa.
+    \item \textbf{Modelo semântico de cenário fictício:} O modelo semântico utilizado, embora estruturalmente representativo de um pipeline de CI/CD real (12 tabelas, 100 medidas), representa um único domínio de negócio. Modelos de outros domínios podem apresentar padrões de expressão DAX não cobertos pelos 32 casos testados;
+    \item \textbf{Validade interna da amostragem:} Os 32 casos de teste, embora gerados a partir de objetos reais do modelo, foram selecionados pelo autor (amostragem não probabilística), o que pode não capturar a totalidade de construtos DAX existentes em modelos semânticos de maior complexidade.
 \end{itemize}
 
 \section{Trabalhos Futuros}
@@ -1041,10 +1026,10 @@ As seguintes extensões são sugeridas para trabalhos futuros:
 \begin{itemize}
     \item \textbf{Comparação multi-LLM:} Executar o experimento com GPT-4o, Claude 3.5 Sonnet e outros modelos, incluindo análise de custo por token e relação custo-benefício;
     \item \textbf{Validação por equivalência numérica:} Implementar validação que execute consultas DAX antes e depois da refatoração via MCP Server, comparando resultados numéricos para garantir preservação da lógica de negócio;
-    \item \textbf{Ampliação dos cenários:} Incluir cenários de deleção de colunas/tabelas, modificação de tipos de dados e migração entre fontes de dados;
+    \item \textbf{Ampliação para outros domínios:} Repetir o experimento sobre modelos semânticos de outros domínios de negócio (ex: financeiro, varejo, saúde), avaliando se a acurácia de 100\% se mantém fora do domínio de CI/CD testado;
     \item \textbf{Integração com CI/CD:} Incorporar o agente em pipelines de integração contínua para modelos semânticos versionados em formato PBIP/TMDL;
-    \item \textbf{Avaliação com modelos reais:} Conduzir estudos de caso com modelos semânticos de organizações parceiras, incluindo avaliação qualitativa com profissionais de BI;
-    \item \textbf{Refinamento de prompts:} Aplicar técnicas de \textit{few-shot prompting} e \textit{fine-tuning} para melhorar a acurácia em cenários de renomeio de coluna, onde a taxa de erro foi mais alta.
+    \item \textbf{Avaliação com modelos reais de organizações parceiras:} Conduzir estudos de caso com modelos semânticos de produção de terceiros, incluindo avaliação qualitativa com profissionais de BI;
+    \item \textbf{Aplicação assistida de deleções:} Estender o agente para sugerir, e não apenas bloquear, possíveis correções para os objetos dependentes antes de uma deleção, mantendo a revisão humana como etapa final de aprovação.
 \end{itemize}
 
 % ==============================================================================

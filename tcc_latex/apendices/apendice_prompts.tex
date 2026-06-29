@@ -5,173 +5,159 @@
 \chapter{Prompts Completos Utilizados no Experimento}
 \label{ap:prompts}
 
-Este apêndice apresenta os prompts completos utilizados no experimento controlado (OE6), incluindo o system prompt e os templates de task prompts para cada tipo de refatoração.
+Este apêndice apresenta os prompts completos implementados no módulo de engenharia de prompts do agente (\texttt{prompt\_engine.py}), utilizados no experimento controlado (OE6), incluindo o system prompt e os templates de task prompts para cada tipo de mudança.
 
-\section{System Prompt (Versão 2.1)}
+\section{System Prompt}
 
-O system prompt define o papel do LLM e estabelece regras rígidas de comportamento:
+O system prompt define o papel do LLM e estabelece regras rígidas de comportamento, com ênfase explícita na preservação do estilo de aspas original (motivado por uma versão preliminar do experimento, em que o LLM ocasionalmente adicionava aspas simples desnecessárias ao redor de nomes de tabela):
 
-\begin{lstlisting}[language=Python, caption=System Prompt v2.1, label=lst:system_prompt]
-SYSTEM_PROMPT = """
-Você é um especialista em DAX (Data Analysis Expressions) e Power BI com mais de 10 anos de experiência em refatoração de modelos semânticos.
+\begin{lstlisting}[language=Python, caption=System Prompt, label=lst:system_prompt]
+SYSTEM_PROMPT = """Você é um especialista em Power BI e DAX (Data Analysis Expressions).
+Sua tarefa é refatorar expressões DAX preservando exatamente a mesma lógica de negócio.
 
-Sua função é refatorar expressões DAX de forma precisa, preservando a lógica de negócio e seguindo as melhores práticas da linguagem.
+REGRAS IMPORTANTES:
+1. NUNCA altere a lógica de negócio - apenas aplique as mudanças estruturais solicitadas
+2. Mantenha EXATAMENTE a formatação, indentação e estilo do original
+3. Preserve todos os comentários existentes (linhas com //)
+4. Se houver ambiguidade, escolha a interpretação mais segura
+5. Retorne APENAS o código DAX refatorado, sem explicações adicionais
+6. Se não for possível refatorar com segurança, retorne "ERRO: <motivo>"
 
-REGRAS OBRIGATÓRIAS:
-1. Retorne APENAS o código DAX refatorado, sem explicações
-2. Use a sintaxe exata do DAX, incluindo aspas e colchetes conforme necessário
-3. Preserve toda a lógica original — apenas atualize referências ao objeto renomeado
-4. Não adicione aspas simples em torno de nomes de tabela/coluna, exceto quando o nome contiver espaços ou caracteres especiais
-5. Mantenha a formatação e indentação original quando possível
-6. Envolva o código DAX em tags XML: <dax>seu_codigo_aqui</dax>
+REGRAS DE ESTILO OBRIGATÓRIAS:
+- Use SEMPRE o mesmo formato de referência que está no código original
+- Se o original usa  dGeral[Coluna]  -> mantenha  dGeral[Coluna]  (SEM aspas simples)
+- Se o original usa  'dGeral'[Coluna] -> mantenha  'dGeral'[Coluna]  (COM aspas simples)
+- NUNCA adicione aspas simples ao redor de nomes de tabela que nao tinham aspas no original
+- NUNCA remova aspas simples de nomes de tabela que tinham aspas no original
 
-IMPORTANTE: Evite alterar nomes de funções, operadores ou qualquer outro elemento que não seja a referência ao objeto renomeado.
-"""
+FORMATO DE RESPOSTA:
+Retorne apenas o codigo DAX entre tags <dax></dax>:
+<dax>
+-- codigo DAX aqui
+</dax>"""
 \end{lstlisting}
 
-\section{Template 1: Renomeio de Coluna (v2.1)}
+\section{Template: Renomeio de Coluna}
 
-Template utilizado para casos C1-01 a C1-07:
+Template utilizado nos 8 casos de renomeio de coluna (D01--D08):
 
 \begin{lstlisting}[language=Python, caption=Template de Renomeio de Coluna, label=lst:prompt_column]
-RENAME_COLUMN_PROMPT = """
-TAREFA: Refatorar expressão DAX após renomeio de coluna.
+TAREFA: Refatorar a expressao DAX abaixo para refletir o renomeio de uma coluna.
 
-CONTEXTO:
+MUDANCA:
 - Tabela: {table_name}
-- Coluna ANTIGA: {old_name}
-- Coluna NOVA: {new_name}
-- Objeto impactado: {object_name} ({object_type})
-{description_line}
+- Coluna antiga: [{old_name}]
+- Coluna nova: [{new_name}]
 
-EXPRESSÃO ORIGINAL:
+INSTRUCAO CRITICA DE ESTILO:
+Substitua APENAS as referencias a coluna renomeada.
+Mantenha EXATAMENTE o mesmo formato de referencia de tabela que esta no codigo original.
+Se o original usa  {table_name}[{old_name}]  (sem aspas), use  {table_name}[{new_name}]  (sem aspas).
+NAO adicione aspas simples ao redor do nome da tabela se elas nao estavam no original.
+
+EXEMPLO CORRETO:
+  Original:  {table_name}[{old_name}]
+  Resultado: {table_name}[{new_name}]
+
+EXEMPLO ERRADO (nao faca isso):
+  Original:  {table_name}[{old_name}]
+  Resultado: '{table_name}'[{new_name}]  <- ERRADO, adicionou aspas desnecessarias
+
+EXPRESSAO ORIGINAL:
+```dax
 {expression}
+```
 
-INSTRUÇÕES:
-1. Substitua TODAS as referências a '{table_name}'[{old_name}] por '{table_name}'[{new_name}]
-2. Se a sintaxe for {table_name}[{old_name}] (sem aspas na tabela), mantenha assim
-3. Preserve exatamente a formatação, indentação e quebras de linha
-4. NÃO altere funções DAX, operadores ou outras colunas
-5. Retorne APENAS o código DAX refatorado em tags <dax>...</dax>
+CONTEXTO ADICIONAL:
+- Objeto: {object_name} ({object_type})
+- Descricao: {description}
 
-EXEMPLO de substituição correta:
-- Original: SUM(Sales[Amount])
-- Correto:  SUM(Sales[TotalAmount])
-- ERRADO:   SUM('Sales'[TotalAmount])  ← NÃO adicione aspas desnecessárias!
-"""
+Retorne a expressao refatorada preservando o estilo original.
 \end{lstlisting}
 
-\section{Template 2: Renomeio de Tabela (v2.0)}
+\section{Template: Renomeio de Tabela}
 
-Template utilizado para casos C2-01 a C2-04:
+Template utilizado nos 4 casos de renomeio de tabela (RT01--RT04):
 
 \begin{lstlisting}[language=Python, caption=Template de Renomeio de Tabela, label=lst:prompt_table]
-RENAME_TABLE_PROMPT = """
-TAREFA: Refatorar expressão DAX após renomeio de tabela.
+TAREFA: Refatorar a expressao DAX abaixo para refletir o renomeio de uma tabela.
+
+MUDANCA:
+- Tabela antiga: '{old_table_name}'
+- Tabela nova: '{new_table_name}'
+
+SUBSTITUICOES NECESSARIAS:
+- Todas as referencias a '{old_table_name}' devem ser substituidas por '{new_table_name}'
+- Manter a mesma estrutura de aspas (se usava aspas simples, manter)
+
+EXPRESSAO ORIGINAL:
+```dax
+{expression}
+```
 
 CONTEXTO:
-- Tabela ANTIGA: {old_table_name}
-- Tabela NOVA: {new_table_name}
-- Objeto impactado: {object_name} ({object_type})
+- Objeto: {object_name} ({object_type})
 
-EXPRESSÃO ORIGINAL:
-{expression}
-
-INSTRUÇÕES:
-1. Substitua TODAS as referências à tabela '{old_table_name}' por '{new_table_name}'
-2. Atualize tanto referências com aspas simples ('Tabela') quanto sem aspas (Tabela)
-3. Preserve a sintaxe de colunas: '{new_table_name}'[NomeColuna]
-4. NÃO altere nomes de funções ou outras tabelas
-5. Retorne APENAS o código DAX refatorado em tags <dax>...</dax>
-
-EXEMPLO:
-- Original: CALCULATE(SUM('Sales'[Amount]), 'Sales'[Region] = "North")
-- Correto:  CALCULATE(SUM('SalesData'[Amount]), 'SalesData'[Region] = "North")
-"""
+Retorne a expressao refatorada.
 \end{lstlisting}
 
-\section{Template 3: Renomeio de Medida (v2.0)}
+\section{Template: Renomeio de Medida}
 
-Template utilizado para casos C3-01 a C3-03:
+Template utilizado nos 8 casos de renomeio de medida (RM01--RM08):
 
 \begin{lstlisting}[language=Python, caption=Template de Renomeio de Medida, label=lst:prompt_measure]
-RENAME_MEASURE_PROMPT = """
-TAREFA: Refatorar expressão DAX após renomeio de medida.
+TAREFA: Refatorar a expressao DAX abaixo para refletir o renomeio de uma medida.
 
-CONTEXTO:
-- Medida ANTIGA: [{old_name}]
-- Medida NOVA: [{new_name}]
-- Objeto impactado: {object_name} ({object_type})
+MUDANCA:
+- Medida antiga: [{old_measure_name}]
+- Medida nova: [{new_measure_name}]
 
-EXPRESSÃO ORIGINAL:
+EXPRESSAO ORIGINAL:
+```dax
 {expression}
-
-INSTRUÇÕES:
-1. Substitua TODAS as referências à medida [{old_name}] por [{new_name}]
-2. Medidas são sempre referenciadas com colchetes: [NomeMedida]
-3. Preserve toda a lógica, incluindo VARs, FILTERs, CALCULATEs
-4. NÃO altere funções DAX ou outras medidas
-5. Retorne APENAS o código DAX refatorado em tags <dax>...</dax>
-
-EXEMPLO:
-- Original: VAR CurrentSales = [Total Sales]
-            RETURN CurrentSales * 1.1
-- Correto:  VAR CurrentSales = [Total Revenue]
-            RETURN CurrentSales * 1.1
-"""
-\end{lstlisting}
-
-\section{Exemplo de Prompt Completo (Caso C1-03)}
-
-Abaixo, um exemplo de prompt completo real enviado ao LLM durante o experimento:
-
-\begin{lstlisting}[language=Python, caption=Exemplo de Prompt Completo (Caso C1-03), label=lst:prompt_example]
-System Prompt:
-Você é um especialista em DAX (Data Analysis Expressions) e Power BI...
-[System prompt completo acima]
-
-User Prompt:
-TAREFA: Refatorar expressão DAX após renomeio de coluna.
+```
 
 CONTEXTO:
-- Tabela: Sales
-- Coluna ANTIGA: Amount
-- Coluna NOVA: SalesAmount
-- Objeto impactado: Total Weighted (measure)
-- Descrição: Medida com SUMX iterando sobre a coluna renomeada
+- Objeto: {object_name} ({object_type})
 
-EXPRESSÃO ORIGINAL:
-SUMX(Sales, Sales[Amount] * Sales[Quantity])
-
-INSTRUÇÕES:
-1. Substitua TODAS as referências a 'Sales'[Amount] por 'Sales'[SalesAmount]
-2. Se a sintaxe for Sales[Amount] (sem aspas na tabela), mantenha assim
-3. Preserve exatamente a formatação, indentação e quebras de linha
-4. NÃO altere funções DAX, operadores ou outras colunas
-5. Retorne APENAS o código DAX refatorado em tags <dax>...</dax>
-
-EXEMPLO de substituição correta:
-- Original: SUM(Sales[Amount])
-- Correto:  SUM(Sales[SalesAmount])
-- ERRADO:   SUM('Sales'[SalesAmount])  ← NÃO adicione aspas desnecessárias!
+Retorne a expressao refatorada.
 \end{lstlisting}
 
-\textbf{Resposta do LLM (Groq Llama 3.3 70B)}:
+\section{Exemplo de Prompt Completo (Caso D01)}
 
-\begin{verbatim}
-<dax>SUMX(Sales, Sales[SalesAmount] * Sales[Quantity])</dax>
-\end{verbatim}
+Abaixo, um exemplo real de prompt enviado ao LLM durante o experimento, referente ao Caso D01 (renomeio da coluna \texttt{Plataforma}, impactando a medida \texttt{Mediana Segundos}):
 
-\textbf{Status}: Correto (acurácia exata = 100\%)
+\begin{lstlisting}[language=Python, caption=Exemplo de Prompt Completo (Caso D01), label=lst:prompt_example]
+TAREFA: Refatorar a expressao DAX abaixo para refletir o renomeio de uma coluna.
 
-\section{Observações sobre Evolução dos Prompts}
+MUDANCA:
+- Tabela: dGeral
+- Coluna antiga: [Plataforma]
+- Coluna nova: [PlataformaUpdated]
 
-A versão 2.1 dos prompts incorporou melhorias baseadas em falhas observadas na versão 2.0:
+INSTRUCAO CRITICA DE ESTILO:
+Substitua APENAS as referencias a coluna renomeada.
+Mantenha EXATAMENTE o mesmo formato de referencia de tabela que esta no codigo original.
 
-\begin{itemize}
-    \item \textbf{Exemplo explícito de erro}: A instrução ``ERRADO: SUM('Sales'[TotalAmount])'' reduziu em 66\% os casos de aspas desnecessárias.
-    \item \textbf{Formatação hierárquica}: Separar contexto, expressão e instruções melhorou a compreensão do LLM.
-    \item \textbf{Tags XML}: O uso de \texttt{<dax>...</dax>} garantiu parsing 100\% confiável, eliminando erros de extração.
-\end{itemize}
+EXPRESSAO ORIGINAL:
+```dax
+SWITCH(
+ TRUE(),
+ SELECTEDVALUE(dGeral[Plataforma]) = "Jenkins",
+ ...
+)
+```
 
-Detalhes completos sobre a evolução dos prompts estão documentados em \texttt{docs/PROMPT\_ENGINEERING.md} no repositório do projeto.
+CONTEXTO ADICIONAL:
+- Objeto: Mediana Segundos (measure)
+
+Retorne a expressao refatorada preservando o estilo original.
+\end{lstlisting}
+
+\textbf{Resposta do LLM (Groq Llama 3.3 70B)}: expressão idêntica ao gabarito, com todas as 4 ocorrências de \texttt{dGeral[Plataforma]} substituídas por \texttt{dGeral[PlataformaUpdated]}, preservando integralmente a estrutura \texttt{SWITCH}/\texttt{CALCULATE}/\texttt{MEDIANX} original.
+
+\textbf{Status}: Correto (Fase 1 e Fase 2), tempo de resposta de 1,84 segundos.
+
+\section{Observações sobre o Prompt}
+
+O system prompt inclui uma instrução explícita de estilo (preservação de aspas simples) e um exemplo de erro comum (``EXEMPLO ERRADO''), estratégia validada pela literatura como eficaz para reduzir erros de formatação em geração de código assistida por LLM (Seção~2.6). No experimento final, com 32 casos de teste, essa instrução contribuiu para uma taxa de erro de geração de 0\% nos 20 casos de renomeio.

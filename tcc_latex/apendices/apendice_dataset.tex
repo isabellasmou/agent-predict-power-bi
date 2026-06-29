@@ -5,213 +5,122 @@
 \chapter{Dataset do Experimento Controlado}
 \label{ap:dataset}
 
-Este apêndice apresenta o dataset completo dos 14 casos de teste utilizados no experimento controlado (OE6), incluindo expressões originais, gabaritos e resultados obtidos.
+Este apêndice apresenta o dataset completo dos 32 casos de teste utilizados no experimento controlado (OE6), incluindo expressões originais, gabaritos e resultados obtidos, distribuídos em duas fases de avaliação (Capítulo 5).
 
 \section{Estrutura do Dataset}
 
-O dataset foi armazenado em formato CSV com as seguintes colunas:
+O dataset é gerado e persistido em formato JSON, com os seguintes campos por caso de teste:
 
 \begin{itemize}
-    \item \textbf{id}: Identificador do caso de teste (ex: C1-01, C2-03)
-    \item \textbf{cenario}: Tipo de mudança (Renomeio de Coluna, Tabela ou Medida)
-    \item \textbf{descricao}: Descrição textual do caso de teste
-    \item \textbf{change\_type}: Tipo de mudança (rename\_column, rename\_table, rename\_measure)
-    \item \textbf{objeto}: Nome da medida ou coluna calculada impactada
-    \item \textbf{old\_name}: Nome antigo do objeto renomeado
-    \item \textbf{new\_name}: Nome novo do objeto renomeado
-    \item \textbf{provedor}: Provedor LLM utilizado (groq, openai, anthropic)
-    \item \textbf{modelo}: Modelo LLM específico (ex: llama-3.3-70b-versatile)
-    \item \textbf{expressao\_original}: Expressão DAX original (entrada)
-    \item \textbf{gabarito}: Expressão DAX esperada (gabarito)
-    \item \textbf{expressao\_gerada}: Expressão DAX gerada pelo LLM (saída)
-    \item \textbf{acuracia\_exata}: Booleano indicando se expressão gerada = gabarito
-    \item \textbf{acuracia\_parcial}: Score de similaridade (0.0 a 1.0)
-    \item \textbf{confianca\_llm}: Confiança estimada do LLM (0.0 a 1.0)
-    \item \textbf{tempo\_s}: Tempo de resposta do LLM em segundos
-    \item \textbf{erro}: Booleano indicando se houve erro de execução
-    \item \textbf{erro\_msg}: Mensagem de erro (se aplicável)
+    \item \textbf{caso\_id}: Identificador do caso de teste (ex: D01, RT02, RM05, DC03, DT01)
+    \item \textbf{tipo\_mudanca}: Tipo de mudança estrutural (rename\_column, rename\_table, rename\_measure, delete\_column, delete\_table)
+    \item \textbf{descricao}: Descrição textual do caso, incluindo o objeto alvo e a medida testada
+    \item \textbf{fase1\_sucesso}: Booleano indicando se a Fase 1 (análise de impacto) identificou corretamente o objeto esperado
+    \item \textbf{fase1\_objetos\_encontrados}: Lista de todos os objetos impactados retornados pelo \texttt{ImpactAnalyzer}
+    \item \textbf{fase1\_requires\_manual\_review}: Booleano indicando se o agente sinalizou necessidade de revisão manual
+    \item \textbf{fase2\_sucesso}: Booleano indicando se a Fase 2 (aplicação) produziu o resultado correto
+    \item \textbf{fase2\_expressao\_gerada}: Expressão DAX gerada pelo LLM (para renomeios) ou \texttt{null} (para deleções bloqueadas)
+    \item \textbf{fase2\_tempo\_segundos}: Tempo de resposta do LLM em segundos (renomeios) ou 0.0 (deleções)
 \end{itemize}
 
-\section{Casos de Teste Completos}
+\section{Casos de Teste por Tipo de Mudança}
 
-\subsection{Cenário 1: Renomeio de Coluna (7 casos)}
+Todos os casos foram executados sobre o modelo semântico real descrito na Seção~\ref{sec:modelo-real} (pipeline de CI/CD Jenkins/Azure DevOps, 12 tabelas, 100 medidas). Por concisão, são apresentados a seguir exemplos representativos de cada tipo; o dataset completo com os 32 casos está disponível no repositório do projeto (Seção~\ref{sec:disponibilidade-dataset}).
 
-\subsubsection{Caso C1-01: Medida Simples com SUM}
+\subsection{Renomeio de Coluna (8 casos)}
+
+\subsubsection{Caso D01: Coluna Plataforma, impacto em cascata de 54 objetos}
 
 \begin{itemize}
-    \item \textbf{Descrição}: Medida simples com SUM referenciando a coluna renomeada
-    \item \textbf{Mudança}: Renomear \texttt{Sales[Amount]} $\rightarrow$ \texttt{Sales[SalesAmount]}
-    \item \textbf{Expressão Original}:
+    \item \textbf{Mudança}: Renomear \texttt{dGeral[Plataforma]} $\rightarrow$ \texttt{dGeral[PlataformaUpdated]}
+    \item \textbf{Medida testada}: \texttt{Mediana Segundos}
+    \item \textbf{Fase 1}: 54 objetos impactados identificados corretamente, incluindo dependências em cascata (ex: \texttt{Mediana de Pipeline Execução}, que depende de \texttt{Mediana Segundos})
+    \item \textbf{Fase 2 -- Expressão Original (trecho)}:
 \end{itemize}
 
 \begin{verbatim}
-SUM(Sales[Amount])
-\end{verbatim}
-
-\begin{itemize}
-    \item \textbf{Gabarito}:
-\end{itemize}
-
-\begin{verbatim}
-SUM(Sales[SalesAmount])
-\end{verbatim}
-
-\begin{itemize}
-    \item \textbf{Expressão Gerada}: \texttt{SUM(Sales[SalesAmount])}
-    \item \textbf{Resultado}: ✅ Correto (acurácia = 100\%)
-    \item \textbf{Tempo}: 1.04s
-\end{itemize}
-
-\subsubsection{Caso C1-02: CALCULATE com Filtro}
-
-\begin{itemize}
-    \item \textbf{Mudança}: Renomear \texttt{Sales[Amount]} $\rightarrow$ \texttt{Sales[SalesAmount]}
-    \item \textbf{Expressão Original}:
-\end{itemize}
-
-\begin{verbatim}
-CALCULATE(SUM(Sales[Amount]), Sales[Channel] = "Online")
-\end{verbatim}
-
-\begin{itemize}
-    \item \textbf{Resultado}: ✅ Correto (acurácia = 100\%)
-    \item \textbf{Tempo}: 0.81s
-\end{itemize}
-
-\subsubsection{Caso C1-03: SUMX Iterador}
-
-\begin{itemize}
-    \item \textbf{Mudança}: Renomear \texttt{Sales[Amount]} $\rightarrow$ \texttt{Sales[SalesAmount]}
-    \item \textbf{Expressão Original}:
-\end{itemize}
-
-\begin{verbatim}
-SUMX(Sales, Sales[Amount] * Sales[Quantity])
-\end{verbatim}
-
-\begin{itemize}
-    \item \textbf{Resultado}: ✅ Correto (acurácia = 100\%)
-    \item \textbf{Tempo}: 7.30s
-\end{itemize}
-
-\subsubsection{Caso C1-04: Coluna Calculada}
-
-\begin{itemize}
-    \item \textbf{Mudança}: Renomear \texttt{Sales[Amount]} $\rightarrow$ \texttt{Sales[SalesAmount]}
-    \item \textbf{Expressão Original}:
-\end{itemize}
-
-\begin{verbatim}
-Sales[Amount] * 1.1
-\end{verbatim}
-
-\begin{itemize}
-    \item \textbf{Gabarito}: \texttt{Sales[SalesAmount] * 1.1}
-    \item \textbf{Expressão Gerada}: \texttt{'Sales'[SalesAmount] * 1.1}
-    \item \textbf{Resultado}: ❌ Incorreto (aspas desnecessárias)
-    \item \textbf{Tempo}: 0.32s
-\end{itemize}
-
-\subsubsection{Caso C1-05: DIVIDE}
-
-\begin{itemize}
-    \item \textbf{Resultado}: ❌ Incorreto (aspas desnecessárias)
-\end{itemize}
-
-\subsubsection{Caso C1-06: Time Intelligence Complexo}
-
-\begin{itemize}
-    \item \textbf{Expressão Original}:
-\end{itemize}
-
-\begin{verbatim}
-CALCULATE(
-    SUM(Sales[Amount]),
-    DATESYTD(Calendar[Date])
+SWITCH(
+ TRUE(),
+ SELECTEDVALUE(dGeral[Plataforma]) = "Jenkins",
+ ...
 )
 \end{verbatim}
 
 \begin{itemize}
-    \item \textbf{Resultado}: ✅ Correto (acurácia = 100\%)
-    \item \textbf{Tempo}: 23.29s (expressão mais longa)
+    \item \textbf{Fase 2 -- Expressão Gerada}: idêntica ao gabarito, com todas as ocorrências de \texttt{dGeral[Plataforma]} substituídas por \texttt{dGeral[PlataformaUpdated]}
+    \item \textbf{Resultado}: Correto (Fase 1 e Fase 2)
+    \item \textbf{Tempo}: 1,84s
 \end{itemize}
 
-\subsubsection{Caso C1-07: Múltiplas Referências em VARs}
+\subsubsection{Caso D03: Coluna Status Pipe Alterado}
 
 \begin{itemize}
-    \item \textbf{Expressão Original}:
+    \item \textbf{Mudança}: Renomear \texttt{dGeral[Status Pipe Alterado]} $\rightarrow$ \texttt{dGeral[Status Pipe AlteradoUpdated]}
+    \item \textbf{Medida testada}: \texttt{Mediana Segundos}
+    \item \textbf{Fase 1}: 13 objetos impactados identificados corretamente
+    \item \textbf{Resultado}: Correto (Fase 1 e Fase 2)
+    \item \textbf{Tempo}: 20,11s (um dos três casos com maior latência, atribuída à API externa e não à complexidade da expressão)
+\end{itemize}
+
+\subsection{Renomeio de Tabela (4 casos)}
+
+\subsubsection{Caso RT01: Tabela dGeral, impacto em 89 objetos}
+
+\begin{itemize}
+    \item \textbf{Mudança}: Renomear tabela \texttt{dGeral} $\rightarrow$ \texttt{dGeralUpdated}
+    \item \textbf{Medida testada}: \texttt{Projetos Jenkins}
+    \item \textbf{Fase 1}: 89 objetos impactados identificados corretamente, o maior número de dependências em cascata do experimento
+    \item \textbf{Fase 2 -- Expressão Gerada (trecho)}:
 \end{itemize}
 
 \begin{verbatim}
-VAR CurrentSales = SUM(Sales[Amount])
-VAR PrevSales = CALCULATE(SUM(Sales[Amount]), 
-                          SAMEPERIODLASTYEAR(Calendar[Date]))
-RETURN
-    DIVIDE(CurrentSales - PrevSales, PrevSales)
+CALCULATE(
+ DISTINCTCOUNT('dGeralUpdated'[Nome Projeto]),
+ 'dGeralUpdated'[Plataforma] = "Jenkins",
+ NOT 'dGeralUpdated'[Nome Projeto] IN ExcludeList
+)
 \end{verbatim}
 
 \begin{itemize}
-    \item \textbf{Resultado}: ✅ Correto (acurácia = 100\%)
-    \item \textbf{Tempo}: 0.36s
+    \item \textbf{Resultado}: Correto (Fase 1 e Fase 2)
+    \item \textbf{Tempo}: 1,12s
 \end{itemize}
 
-\subsection{Cenário 2: Renomeio de Tabela (4 casos)}
+\subsection{Renomeio de Medida (8 casos)}
 
-\subsubsection{Caso C2-01: SUM Simples}
+\subsubsection{Caso RM01: Medida Execuções Sucesso}
 
 \begin{itemize}
-    \item \textbf{Mudança}: Renomear \texttt{Sales} $\rightarrow$ \texttt{SalesData}
-    \item \textbf{Expressão Original}: \texttt{SUM(Sales[Amount])}
-    \item \textbf{Gabarito}: \texttt{SUM(SalesData[Amount])}
-    \item \textbf{Resultado}: ✅ Correto
-    \item \textbf{Tempo}: 0.21s (caso mais rápido do experimento)
+    \item \textbf{Mudança}: Renomear medida \texttt{[Execuções Sucesso]} $\rightarrow$ \texttt{[Execuções Sucesso Updated]}
+    \item \textbf{Medida testada}: \texttt{Porcentagem Sucesso}
+    \item \textbf{Expressão Original}: \texttt{DIVIDE([Execuções Sucesso], [Total de Execuções], BLANK())}
+    \item \textbf{Expressão Gerada}: \texttt{DIVIDE([Execuções Sucesso Updated], [Total de Execuções], BLANK())}
+    \item \textbf{Resultado}: Correto (Fase 1 e Fase 2)
+    \item \textbf{Tempo}: 2,42s
 \end{itemize}
 
-\subsubsection{Caso C2-02: CALCULATE + FILTER}
+\subsection{Deleção de Coluna (8 casos)}
+
+\subsubsection{Caso DC02: Deleção da coluna Plataforma}
 
 \begin{itemize}
-    \item \textbf{Resultado}: ✅ Correto
+    \item \textbf{Mudança}: Deletar \texttt{dGeral[Plataforma]}
+    \item \textbf{Medida testada}: \texttt{Projetos Jenkins}
+    \item \textbf{Fase 1}: 54 objetos impactados identificados, com \texttt{requires\_manual\_review=True}
+    \item \textbf{Fase 2}: aplicação automática corretamente bloqueada -- o agente não tentou gerar uma correção, sinalizando a dependência ativa para revisão manual
+    \item \textbf{Resultado}: Correto (bloqueio esperado)
 \end{itemize}
 
-\subsubsection{Caso C2-03: COUNTROWS}
+\subsection{Deleção de Tabela (4 casos)}
+
+\subsubsection{Caso DT01: Deleção da tabela dGeral}
 
 \begin{itemize}
-    \item \textbf{Expressão Original}: \texttt{COUNTROWS(Sales)}
-    \item \textbf{Gabarito}: \texttt{COUNTROWS(SalesData)}
-    \item \textbf{Expressão Gerada}: (resposta inválida)
-    \item \textbf{Resultado}: ❌ Incorreto (LLM retornou resposta não-DAX)
-    \item \textbf{Tempo}: 0.31s
-    \item \textbf{Observação}: Expressão extremamente simples pode ter confundido o LLM
-\end{itemize}
-
-\subsubsection{Caso C2-04: SUMX + RELATED}
-
-\begin{itemize}
-    \item \textbf{Resultado}: ✅ Correto
-    \item \textbf{Tempo}: 9.33s
-\end{itemize}
-
-\subsection{Cenário 3: Renomeio de Medida (3 casos)}
-
-\subsubsection{Caso C3-01: Medida Simples}
-
-\begin{itemize}
-    \item \textbf{Mudança}: Renomear \texttt{[Total Sales]} $\rightarrow$ \texttt{[Total Revenue]}
-    \item \textbf{Expressão Original}: \texttt{[Total Sales] - [Total Cost]}
-    \item \textbf{Resultado}: ✅ Correto
-    \item \textbf{Tempo}: 22.28s
-\end{itemize}
-
-\subsubsection{Caso C3-02: CALCULATE com Medida}
-
-\begin{itemize}
-    \item \textbf{Resultado}: ✅ Correto
-\end{itemize}
-
-\subsubsection{Caso C3-03: DIVIDE com Medidas}
-
-\begin{itemize}
-    \item \textbf{Resultado}: ✅ Correto
+    \item \textbf{Mudança}: Deletar tabela \texttt{dGeral} (77 referências em medidas)
+    \item \textbf{Medida testada}: \texttt{Projetos Jenkins}
+    \item \textbf{Fase 1}: 89 objetos impactados identificados, com \texttt{requires\_manual\_review=True}
+    \item \textbf{Fase 2}: aplicação automática corretamente bloqueada
+    \item \textbf{Resultado}: Correto (bloqueio esperado)
 \end{itemize}
 
 \section{Resumo Estatístico do Dataset}
@@ -224,49 +133,57 @@ RETURN
 \toprule
 \textbf{Métrica} & \textbf{Valor} \\
 \midrule
-Total de Casos & 14 \\
-Casos Corretos & 11 (78.6\%) \\
-Casos Incorretos & 3 (21.4\%) \\
-Tempo Médio de Resposta & 4.96s \\
-Tempo Mínimo & 0.21s (C2-01) \\
-Tempo Máximo & 23.29s (C1-06) \\
-Confiança Média do LLM & 92.86\% \\
-Taxa de Erro do Sistema & 0.0\% \\
+Total de Casos & 32 \\
+Acurácia Fase 1 (Análise de Impacto) & 100\% (32/32) \\
+Acurácia Fase 2 (Aplicação) & 100\% (32/32) \\
+Casos com chamada ao LLM (renomeios) & 20 \\
+Casos com bloqueio de deleção & 12 \\
+Tempo Médio de Resposta (LLM) & 5,1s \\
+Tempo Mínimo & 0,66s \\
+Tempo Máximo & 27,1s \\
+Taxa de Erro de Geração & 0\% \\
+Máximo de Objetos Impactados em 1 Caso & 89 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \section{Disponibilidade do Dataset}
+\label{sec:disponibilidade-dataset}
 
 O dataset completo está disponível no repositório do projeto:
 
 \begin{itemize}
-    \item \textbf{CSV bruto}: \texttt{experiments/resultados/resultado\_20260505\_211431.csv}
-    \item \textbf{Resumo JSON}: \texttt{experiments/resultados/resultado\_20260505\_211431\_resumo.json}
-    \item \textbf{Análise}: \texttt{experiments/ANALISE\_RESULTADOS.md}
+    \item \textbf{Resultado completo (JSON)}: \texttt{data/experimento\_completo\_resultados.json}
+    \item \textbf{Script de execução}: \texttt{executar\_experimento.py}
+    \item \textbf{Script de geração de figuras}: \texttt{gerar\_figuras\_resultados.py}
 \end{itemize}
 
-O repositório está publicado sob licença MIT em:
+O repositório está publicado em:
 
-\url{https://github.com/isabellamoura/pbi-refactor-agent}
+\url{https://github.com/isabellasmou/agent-predict-power-bi}
 
 \section{Reprodutibilidade}
 
 Para reproduzir o experimento:
 
 \begin{verbatim}
-# Clonar repositório
-git clone https://github.com/isabellamoura/pbi-refactor-agent.git
-cd pbi-refactor-agent
+# Clonar repositorio
+git clone https://github.com/isabellasmou/agent-predict-power-bi.git
+cd agent-predict-power-bi
 
-# Instalar dependências
+# Instalar dependencias
 pip install -e ".[dev]"
 
-# Configurar API key (Groq é gratuito)
+# Configurar API key (Groq e gratuito)
 echo "GROQ_API_KEY=sua_chave_aqui" > .env
 
-# Executar experimento
-python experiments/experimento_controlado.py
+# Colocar o arquivo .pbit na pasta data/
+
+# Executar experimento (acha o .pbit automaticamente)
+python executar_experimento.py
+
+# Gerar as figuras de resultado
+python gerar_figuras_resultados.py data/experimento_completo_resultados.json
 \end{verbatim}
 
-Os resultados serão salvos em \texttt{experiments/resultados/} com timestamp único para rastreabilidade.
+Os resultados são salvos em \texttt{data/experimento\_completo\_resultados.json}, com métricas separadas por fase e por tipo de mudança.
