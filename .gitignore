@@ -2,3 +2,15 @@
 .env
 data/
 .venv
+
+# Artefatos de build/instalação Python (gerados automaticamente, não versionar)
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+build/
+dist/
+*.egg
+
+# Cache de testes
+.pytest_cache/

@@ -56,6 +56,19 @@
 \renewcommand{\ABNTEXsectionfontsize}{\normalsize}
 \renewcommand{\ABNTEXsubsectionfontsize}{\normalsize}
 \renewcommand{\ABNTEXsubsubsectionfontsize}{\normalsize}
+
+% Customiza a hierarquia visual do SUMÁRIO (lista de capítulos/seções
+% gerada por \tableofcontents): capítulo e seção em negrito; a partir
+% da subseção, itálico sem negrito, mantendo a distinção hierárquica
+% sem repetir o mesmo peso visual em todos os níveis.
+\renewcommand{\cftchapterfont}{\bfseries}
+\renewcommand{\cftchapterpagefont}{\normalsize\cftchapterfont}
+\renewcommand{\cftsectionfont}{\bfseries}
+\renewcommand{\cftsectionpagefont}{\cftsectionfont}
+\renewcommand{\cftsubsectionfont}{\itshape}
+\renewcommand{\cftsubsectionpagefont}{\cftsubsectionfont}
+\renewcommand{\cftsubsubsectionfont}{\itshape\small}
+\renewcommand{\cftsubsubsectionpagefont}{\cftsubsubsectionfont}
 \renewcommand{\ABNTEXsubsubsubsectionfontsize}{\normalsize}
 
 % ==============================================================================
@@ -370,12 +383,12 @@ Para responder à pergunta de pesquisa, este trabalho segue o paradigma da Desig
 
 \section{Organização do Trabalho}
 
-Este trabalho está organizado em seis capítulos. Após esta introdução, o Capítulo 2 apresenta o referencial teórico, abordando os conceitos fundamentais sobre Power BI, DAX, Model Context Protocol, Large Language Models e Design Science Research. Em seguida, a metodologia adotada é descrita no Capítulo 3, seguida pelo detalhamento do desenvolvimento do agente proposto no Capítulo 4. Os resultados experimentais e a discussão correspondente são apresentados no Capítulo 5, e o trabalho se encerra no Capítulo 6, com as conclusões, limitações e sugestões para trabalhos futuros.
+Este trabalho está organizado em seis capítulos. Após esta introdução, o Capítulo 2 apresenta a fundamentação teórica, abordando os conceitos fundamentais sobre Power BI, DAX, Model Context Protocol, Large Language Models e Design Science Research. Em seguida, a metodologia adotada é descrita no Capítulo 3, seguida pelo detalhamento do desenvolvimento do agente proposto no Capítulo 4. Os resultados experimentais e a discussão correspondente são apresentados no Capítulo 5, e o trabalho se encerra no Capítulo 6, com as conclusões, limitações e sugestões para trabalhos futuros.
 
 % ######################################################################
-% CAPÍTULO 2 - REFERENCIAL TEÓRICO
+% CAPÍTULO 2 - FUNDAMENTAÇÃO TEÓRICA
 % ######################################################################
-\chapter{REFERENCIAL TEÓRICO}
+\chapter{FUNDAMENTAÇÃO TEÓRICA}
 
 A revisão de literatura foi conduzida nas bases de dados Google Scholar, ACM Digital Library, IEEE Xplore e Microsoft Learn, no período de janeiro a maio de 2026. As strings de busca utilizadas incluíram: ``Power BI semantic model refactoring'', ``LLM code refactoring'', ``DAX maintenance'', ``Model Context Protocol'', ``dependency graph analysis'' e ``automated impact analysis''. Foram priorizados artigos publicados entre 2022 e 2026, incluindo documentação técnica oficial da Microsoft e trabalhos empíricos sobre aplicação de LLMs em engenharia de software.
 
@@ -534,9 +547,7 @@ Este trabalho não envolve coleta de dados humanos, pesquisa com seres humanos o
 
 O código-fonte do agente desenvolvido foi disponibilizado publicamente sob licença MIT no repositório GitHub do projeto, permitindo reprodutibilidade e auditoria por terceiros. Não há conflitos de interesse a declarar.
 
-\section{Cenários de Validação}
-
-\subsection{Cenário 1: Renomeio de Coluna com Dependências em Cascata}
+\section{Cenário de Validação: Renomeio de Coluna com Dependências em Cascata}
 
 Uma equipe de BI recebe a notificação de que a fonte de dados de pipelines de CI/CD foi atualizada. A coluna \texttt{Plataforma} da tabela \texttt{dGeral}, que identifica se cada execução de pipeline ocorreu no Jenkins ou no Azure DevOps, precisa ser renomeada para \texttt{PlataformaUpdated} para refletir uma mudança no esquema de origem. No modelo semântico real utilizado na avaliação experimental deste trabalho (Capítulo 5), essa coluna é referenciada direta ou indiretamente por diversas medidas, incluindo \texttt{Mediana Segundos}, \texttt{Mediana Jenkins DIFF}, \texttt{Mediana Segundos Build}, \texttt{Mediana Segundos Deploy}, \texttt{Mediana Segundos Package} e \texttt{Sistemas Distintos Jenkins}, configurando um cenário real de dependências em cascata.
 
@@ -550,21 +561,6 @@ Uma equipe de BI recebe a notificação de que a fonte de dados de pipelines de 
 \end{enumerate}
 
 \textbf{Resultado esperado:} O time de BI reduz de horas ou dias para minutos o processo de renomeio de coluna, com segurança de que o modelo não será corrompido.
-
-\subsection{Cenário 2: Diagnóstico de Erro de Refresh por Dados Nulos}
-
-\textbf{Nota de escopo:} Este cenário foi identificado durante a fase de análise do problema e o agente possui módulo de diagnóstico implementado (\texttt{ModelHealthChecker}). Contudo, a avaliação quantitativa deste cenário está fora do escopo do experimento controlado conduzido neste trabalho, que se concentra em cenários de renomeio estrutural (OE6). Fica como recomendação para trabalhos futuros a condução de experimento específico para este cenário.
-
-Uma equipe de BI executa o refresh completo do modelo (duração média: 2 horas). Após 1h50, o processo falha com erro de \texttt{NullKeyNotAllowed}. Não há visibilidade imediata da causa raiz.
-
-\textbf{Fluxo de valor do agente (módulo complementar):}
-\begin{enumerate}
-    \item \textbf{Diagnóstico pós-falha:} O agente executa \texttt{validate\_model\_integrity} nas tabelas envolvidas.
-    \item \textbf{Identificação:} Detecta que a coluna \texttt{Matricula} contém 1.234 valores nulos.
-    \item \textbf{Relatório de impacto:} Informa localização exata do problema, relacionamentos afetados e sugestões de correção.
-\end{enumerate}
-
-\textbf{Resultado esperado:} O tempo de diagnóstico é reduzido de horas de investigação manual para menos de 1 minuto.
 
 % ######################################################################
 % CAPÍTULO 4 - DESENVOLVIMENTO

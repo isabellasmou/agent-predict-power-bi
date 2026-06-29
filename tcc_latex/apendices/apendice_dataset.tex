@@ -150,17 +150,17 @@ Máximo de Objetos Impactados em 1 Caso & 89 \\
 \section{Disponibilidade do Dataset}
 \label{sec:disponibilidade-dataset}
 
-O dataset completo está disponível no repositório do projeto:
+O código-fonte do agente e o script de execução do experimento estão disponíveis no repositório do projeto:
 
 \begin{itemize}
-    \item \textbf{Resultado completo (JSON)}: \texttt{data/experimento\_completo\_resultados.json}
-    \item \textbf{Script de execução}: \texttt{executar\_experimento.py}
-    \item \textbf{Script de geração de figuras}: \texttt{gerar\_figuras\_resultados.py}
+    \item \textbf{Script de execução}: \texttt{experiments/executar\_experimento.py}
 \end{itemize}
 
 O repositório está publicado em:
 
 \url{https://github.com/isabellasmou/agent-predict-power-bi}
+
+O arquivo \texttt{.pbit} de origem e o JSON de resultado completo (\texttt{data/experimento\_completo\_resultados.json}) não são versionados no repositório público, por conter dados estruturais do modelo semântico utilizado; ambos podem ser obtidos sob solicitação ao autor ou reproduzidos integralmente a partir do código-fonte e do procedimento descrito na Seção a seguir.
 
 \section{Reprodutibilidade}
 
@@ -180,10 +180,7 @@ echo "GROQ_API_KEY=sua_chave_aqui" > .env
 # Colocar o arquivo .pbit na pasta data/
 
 # Executar experimento (acha o .pbit automaticamente)
-python executar_experimento.py
-
-# Gerar as figuras de resultado
-python gerar_figuras_resultados.py data/experimento_completo_resultados.json
+python experiments/executar_experimento.py
 \end{verbatim}
 
 Os resultados são salvos em \texttt{data/experimento\_completo\_resultados.json}, com métricas separadas por fase e por tipo de mudança.
