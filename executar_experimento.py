@@ -27,9 +27,16 @@ Testa o agente em DUAS FASES, contra um modelo .pbit REAL:
         decidido pela análise de impacto da Fase 1, não por geração de texto.
 
 USO:
-    python executar_experimento.py gerar "data\\modelo.pbit" --max-casos 8
-    -> revise data\\candidatos_revisao.json (igual antes)
-    python executar_experimento.py executar "data\\modelo.pbit" --provider groq --model llama-3.3-70b-versatile
+    python executar_experimento.py
+    -> acha automaticamente o único .pbit dentro da pasta data, gera os casos
+       dos 5 tipos de mudança, e já executa as 2 fases contra o LLM — tudo em
+       1 comando, sem revisão manual no meio.
+
+    Parâmetros opcionais (todos têm valor padrão):
+        --provider groq|openai|google|anthropic   (default: groq)
+        --model <nome-do-modelo>                   (default: llama-3.3-70b-versatile)
+        --max-casos <int>                          (default: 8, por tipo de mudança)
+        --pbit "<caminho>"                         (se quiser apontar manualmente)
 
 Os resultados ficam em data\\experimento_completo_resultados.json, com
 métricas separadas por fase e por tipo de mudança.
@@ -56,6 +63,42 @@ from experimento_dinamico import ExperimentoDinamico
 
 
 # ============================================================================
+# DESCOBERTA AUTOMÁTICA DO .pbit
+# ============================================================================
+
+def encontrar_pbit_automaticamente(pasta_data: str = "data") -> str:
+    """
+    Procura o único arquivo .pbit dentro da pasta data\\.
+
+    - Se encontrar exatamente 1 arquivo .pbit, usa ele.
+    - Se encontrar 0, erro claro pedindo para colocar o .pbit em data\\.
+    - Se encontrar mais de 1, erro claro pedindo para usar --pbit e
+      especificar qual usar (evita rodar o experimento no arquivo errado
+      silenciosamente).
+    """
+    pasta = Path(pasta_data)
+    if not pasta.exists():
+        print(f"❌ Pasta '{pasta_data}' não encontrada. Crie a pasta e coloque seu arquivo .pbit dentro dela.")
+        sys.exit(1)
+
+    candidatos = sorted(pasta.glob("*.pbit"))
+
+    if len(candidatos) == 0:
+        print(f"❌ Nenhum arquivo .pbit encontrado em '{pasta_data}\\'. Coloque seu arquivo .pbit nessa pasta.")
+        sys.exit(1)
+
+    if len(candidatos) > 1:
+        nomes = "\n".join(f"   - {c.name}" for c in candidatos)
+        print(f"❌ Mais de um arquivo .pbit encontrado em '{pasta_data}\\':\n{nomes}\n"
+              f"   Especifique qual usar com --pbit \"data\\NOME_DO_ARQUIVO.pbit\"")
+        sys.exit(1)
+
+    pbit_path = str(candidatos[0])
+    print(f"🔎 .pbit encontrado automaticamente: {pbit_path}")
+    return pbit_path
+
+
+# ============================================================================
 # SETUP (reusa a mesma sequência do app.py)
 # ============================================================================
 
@@ -69,17 +112,8 @@ def montar_experimento(pbit_path: str) -> ExperimentoDinamico:
     return ExperimentoDinamico(metadata=metadata, graph=graph, dax_refactor=dax_refactor)
 
 
-# ============================================================================
-# ETAPA "gerar" — inalterada (reusa exportar_candidatos_para_revisao já existente)
-# ============================================================================
-
-def etapa_gerar(args):
-    experimento = montar_experimento(args.pbit_path)
-    casos = experimento.gerar_todos_os_tipos(max_casos_por_tipo=args.max_casos)
-    if not casos:
-        print("❌ Nenhum caso gerado. Verifique se há medidas DAX referenciando colunas/tabelas no modelo.")
-        sys.exit(1)
-    experimento.exportar_candidatos_para_revisao(casos, output_path=args.revisao_path)
+# (a geração de casos agora acontece direto dentro de rodar_experimento_completo,
+#  sem etapa separada nem arquivo de revisão intermediário — ver mais abaixo)
 
 
 # ============================================================================
@@ -156,41 +190,112 @@ async def testar_fase2_aplicacao_rename(
     dax_refactor: DAXRefactor,
     llm_provider: LLMProvider,
     llm_model: str,
+    max_concurrent: int = 1,
 ) -> Dict[str, Any]:
     """
     Para rename_*: chama o DAXRefactor real (LLM) e compara com o gabarito
     (substituição textual), exatamente como no experimento anterior.
+
+    IMPORTANTE — filtragem antes de chamar o LLM:
+    O ImpactAnalysis completo (fase1_impact_analysis) pode conter dezenas de
+    objetos impactados (uma coluna usada em 50+ medidas, por exemplo). Mas
+    cada caso de teste avalia o gabarito de UMA medida específica
+    (caso["objeto_nome"]). Chamar dax_refactor.refactor() com o
+    impact_analysis completo refatoraria TODAS as medidas impactadas,
+    gastando tokens em dezenas de chamadas ao LLM cujo resultado nem é
+    comparado a nenhum gabarito — o que tanto desperdiça cota de API quanto
+    torna a métrica de tempo/custo do experimento incorreta (mede "refatorar
+    N medidas concorrentemente", não "refatorar 1 medida"). Por isso,
+    filtramos o impact_analysis para conter apenas o objeto-alvo do caso
+    antes de chamar o LLM — a Fase 1 (análise de impacto real, completa)
+    não é afetada por este filtro, que ocorre só aqui na Fase 2.
+
+    max_concurrent=1 por padrão (sequencial), como segurança adicional
+    contra rate limit do tier gratuito da Groq, já que o DAXRefactor engole
+    exceções internamente (asyncio.gather com return_exceptions=True) e
+    devolve um item com expressão vazia, sem propagar o erro real.
     """
+    medida_esperada = caso["objeto_nome"]
+
+    # Filtra o impact_analysis para conter só o objeto-alvo do caso
+    todos_impactos = (
+        list(fase1_impact_analysis.direct_impacts) +
+        list(fase1_impact_analysis.cascade_impacts)
+    )
+    impacto_alvo = next(
+        (imp for imp in todos_impactos if imp.object.name == medida_esperada),
+        None,
+    )
+
+    if impacto_alvo is None:
+        return {
+            "fase2_sucesso": False,
+            "fase2_erro": "medida_esperada_nao_esta_nos_impactos_da_fase1",
+            "fase2_expressao_gerada": "",
+            "fase2_tempo_segundos": 0.0,
+            "fase2_causa_falha": "medida_nao_encontrada_no_impact_analysis",
+        }
+
+    impact_analysis_filtrado = fase1_impact_analysis.model_copy(
+        update={
+            "direct_impacts": [impacto_alvo] if impacto_alvo in fase1_impact_analysis.direct_impacts else [],
+            "cascade_impacts": [impacto_alvo] if impacto_alvo in fase1_impact_analysis.cascade_impacts else [],
+        }
+    )
+
     inicio = datetime.now()
     try:
         result = await dax_refactor.refactor(
-            impact_analysis=fase1_impact_analysis,
+            impact_analysis=impact_analysis_filtrado,
             llm_provider=llm_provider,
             llm_model=llm_model,
+            max_concurrent=max_concurrent,
         )
         tempo = (datetime.now() - inicio).total_seconds()
-        if result.items and result.items[0].refactored_expression:
-            gerada = result.items[0].refactored_expression
-        else:
+
+        item_correspondente = next(
+            (item for item in result.items if item.object.name == medida_esperada),
+            None,
+        )
+
+        if item_correspondente is None:
+            # A medida esperada nem apareceu na lista de itens retornados pelo
+            # DAXRefactor — situação anômala, sinaliza explicitamente.
             gerada = ""
+            causa_falha = "medida_nao_encontrada_no_resultado"
+        elif not item_correspondente.refactored_expression:
+            # O DAXRefactor engole exceções internamente (asyncio.gather com
+            # return_exceptions=True) e converte falhas (incluindo rate limit
+            # da API) em um RefactorItem com refactored_expression="" — sem
+            # propagar a mensagem de erro real para este código. Sinalizamos
+            # isso como "falha_geracao_llm" para não confundir com erro de
+            # qualidade do prompt/modelo.
+            gerada = ""
+            causa_falha = "falha_geracao_llm_possivel_rate_limit"
+        else:
+            gerada = item_correspondente.refactored_expression
+            causa_falha = None
     except Exception as e:
         gerada = ""
+        causa_falha = "excecao_nivel_experimento"
         tempo = (datetime.now() - inicio).total_seconds()
         return {
             "fase2_sucesso": False,
             "fase2_erro": str(e),
             "fase2_expressao_gerada": "",
             "fase2_tempo_segundos": tempo,
+            "fase2_causa_falha": causa_falha,
         }
 
     gabarito = caso["gabarito"]
-    acerto = _normalizar(gabarito) == _normalizar(gerada)
+    acerto = (gerada != "") and (_normalizar(gabarito) == _normalizar(gerada))
 
     return {
         "fase2_sucesso": acerto,
         "fase2_erro": None,
         "fase2_expressao_gerada": gerada,
         "fase2_tempo_segundos": tempo,
+        "fase2_causa_falha": causa_falha if not acerto else None,
     }
 
 
@@ -222,23 +327,27 @@ def testar_fase2_aplicacao_delete(fase1_resultado: Dict[str, Any]) -> Dict[str, 
 # ORQUESTRAÇÃO DA ETAPA "executar"
 # ============================================================================
 
-async def etapa_executar(args):
-    experimento = montar_experimento(args.pbit_path)
-    casos_aprovados = experimento.filtrar_aprovados(revisao_path=args.revisao_path)
-    if not casos_aprovados:
-        print("❌ Nenhum candidato aprovado em", args.revisao_path)
+async def rodar_experimento_completo(args):
+    pbit_path = args.pbit or encontrar_pbit_automaticamente()
+
+    experimento = montar_experimento(pbit_path)
+
+    print(f"\n🎯 Gerando até {args.max_casos} caso(s) de cada tipo de mudança...")
+    casos = experimento.gerar_todos_os_tipos(max_casos_por_tipo=args.max_casos)
+    if not casos:
+        print("❌ Nenhum caso gerado. Verifique se há medidas DAX referenciando colunas/tabelas no modelo.")
         sys.exit(1)
 
     analyzer = ImpactAnalyzer(experimento.graph, metadata=experimento.metadata)
     llm_provider = LLMProvider(args.provider)
 
     resultados = []
-    print(f"\n🔬 Executando {len(casos_aprovados)} caso(s) em 2 fases...\n")
+    print(f"\n🔬 Executando {len(casos)} caso(s) em 2 fases...\n")
 
-    for i, caso in enumerate(casos_aprovados, 1):
+    for i, caso in enumerate(casos, 1):
         caso_id = caso["id"]
         tipo = caso["change_type"] if isinstance(caso["change_type"], str) else caso["change_type"].value
-        print(f"  [{i}/{len(casos_aprovados)}] {caso_id} ({tipo})")
+        print(f"  [{i}/{len(casos)}] {caso_id} ({tipo})")
 
         # ---- FASE 1: Análise de Impacto (sempre, para os 5 tipos) ----
         fase1 = testar_fase1_impacto(caso, analyzer)
@@ -259,6 +368,11 @@ async def etapa_executar(args):
             fase2 = await testar_fase2_aplicacao_rename(
                 caso, impact_analysis_completo, experimento.dax_refactor, llm_provider, args.model
             )
+            # Pequena pausa de segurança contra rate limit: cada caso pode
+            # disparar dezenas de chamadas ao LLM internamente (uma por
+            # objeto impactado), então mesmo com max_concurrent=1 vale dar
+            # uma folga extra entre casos consecutivos.
+            await asyncio.sleep(1.0)
         else:  # delete_column, delete_table
             fase2 = testar_fase2_aplicacao_delete(fase1)
 
@@ -299,10 +413,10 @@ async def etapa_executar(args):
     output_data = {
         "metadata_experimento": {
             "data_execucao": datetime.now().isoformat(),
-            "pbit_origem": args.pbit_path,
+            "pbit_origem": pbit_path,
             "provedor_llm": args.provider,
             "modelo_llm": args.model,
-            "fluxo": "duas_fases (analise_impacto + aplicacao)",
+            "fluxo": "duas_fases (analise_impacto + aplicacao), comando unico sem revisao manual",
         },
         "resumo_geral": {
             "total_casos": total,
@@ -328,7 +442,19 @@ async def etapa_executar(args):
     print(f"\nPor tipo de mudança:")
     for tipo, v in resumo_por_tipo.items():
         print(f"  {tipo:<18} Fase1={v['fase1_acuracia']*100:5.1f}%  Fase2={v['fase2_acuracia']*100:5.1f}%  (n={v['total']})")
+
+    possiveis_rate_limit = sum(
+        1 for r in resultados
+        if r.get("fase2_causa_falha") == "falha_geracao_llm_possivel_rate_limit"
+    )
+    if possiveis_rate_limit > 0:
+        print(f"\n⚠️  {possiveis_rate_limit} caso(s) com possível rate limit da API "
+              f"(o DAXRefactor engole o erro internamente e retorna expressão vazia, "
+              f"sem detalhar a causa). Se isso for muitos casos, espere alguns minutos "
+              f"e rode de novo, ou reduza --max-casos.")
+
     print(f"\n💾 Resultados salvos em: {out.resolve()}")
+    print(f"\n➡️  Próximo passo: python gerar_figuras_resultados.py \"{out}\"")
 
 
 # ============================================================================
@@ -336,27 +462,19 @@ async def etapa_executar(args):
 # ============================================================================
 
 def main():
-    parser = argparse.ArgumentParser(description="Experimento de 2 fases: Análise de Impacto + Aplicação")
-    sub = parser.add_subparsers(dest="etapa", required=True)
-
-    p_gerar = sub.add_parser("gerar", help="Etapa 1: gerar candidatos (5 tipos) e exportar para revisão")
-    p_gerar.add_argument("pbit_path")
-    p_gerar.add_argument("--max-casos", type=int, default=8,
-                          help="Número de casos a gerar POR TIPO de mudança (default: 8)")
-    p_gerar.add_argument("--revisao-path", default="data/candidatos_revisao.json")
-
-    p_exec = sub.add_parser("executar", help="Etapa 2: testar Fase 1 (impacto) + Fase 2 (aplicação) nos aprovados")
-    p_exec.add_argument("pbit_path")
-    p_exec.add_argument("--provider", default="groq", choices=["groq", "openai", "google", "anthropic"])
-    p_exec.add_argument("--model", default="llama-3.3-70b-versatile")
-    p_exec.add_argument("--revisao-path", default="data/candidatos_revisao.json")
-    p_exec.add_argument("--output", default="data/experimento_completo_resultados.json")
+    parser = argparse.ArgumentParser(
+        description="Roda o experimento completo (2 fases) em 1 comando só, sem revisão manual."
+    )
+    parser.add_argument("--pbit", default=None,
+                         help="Caminho do .pbit. Se omitido, busca automaticamente dentro de data\\")
+    parser.add_argument("--provider", default="groq", choices=["groq", "openai", "google", "anthropic"])
+    parser.add_argument("--model", default="llama-3.3-70b-versatile")
+    parser.add_argument("--max-casos", type=int, default=8,
+                         help="Número de casos a gerar POR TIPO de mudança (default: 8)")
+    parser.add_argument("--output", default="data/experimento_completo_resultados.json")
 
     args = parser.parse_args()
-    if args.etapa == "gerar":
-        etapa_gerar(args)
-    else:
-        asyncio.run(etapa_executar(args))
+    asyncio.run(rodar_experimento_completo(args))
 
 
 if __name__ == "__main__":

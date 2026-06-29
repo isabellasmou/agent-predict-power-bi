@@ -17,23 +17,30 @@
 % ==============================================================================
 \usepackage[utf8]{inputenc}     % Codificação UTF-8
 \usepackage[T1]{fontenc}        % Seleção de código de fonte
-\usepackage{lmodern}            % Fonte Latin Modern
+\usepackage{mathptmx}           % Fonte Times New Roman (exigida pelo manual FAETERJ/Paracambi)
 \usepackage{graphicx}           % Inclusão de gráficos
 \usepackage{booktabs}           % Tabelas profissionais
 \usepackage{tabularx}           % Tabelas com largura ajustável
 \usepackage{multirow}           % Mesclar linhas em tabelas
 \usepackage{indentfirst}        % Indenta primeiro parágrafo de cada seção
 \usepackage{microtype}          % Melhorias tipográficas
+\microtypesetup{expansion=false} % Times (mathptmx) não suporta expansão automática
 \usepackage{hyperref}           % Hyperlinks
 \usepackage{listings}           % Listagens de código
 \usepackage{xcolor}             % Cores
 \usepackage{float}              % Controle de posicionamento de figuras
 \usepackage{enumitem}           % Listas customizadas
 \usepackage{amsmath}            % Matemática
+\usepackage{changepage}         % Ambiente adjustwidth (recuo da dedicatória)
 \usepackage[alf]{abntex2cite}   % Citações ABNT (\citeonline, \cite)
 
 % Comando para fonte de figuras e tabelas (ABNT)
 \providecommand{\fonte}[1]{\vspace{-0.3cm}\par\footnotesize Fonte: #1}
+
+% Uniformiza a fonte de capa, capítulos e seções para Times (rmfamily),
+% sobrescrevendo o padrão sans-serif (\sffamily) do abntex2
+\renewcommand{\ABNTEXchapterfont}{\rmfamily}
+\renewcommand{\ABNTEXsectionfont}{\rmfamily}
 
 % ==============================================================================
 % CONFIGURAÇÃO DE CÓDIGO-FONTE
@@ -69,12 +76,13 @@
     GOVERNO DO ESTADO DO RIO DE JANEIRO \\
     SECRETARIA DE ESTADO CIÊNCIA E TECNOLOGIA \\
     FUNDAÇÃO DE APOIO À ESCOLA TÉCNICA \\
-    FACULDADE DE EDUCAÇÃO TECNOLÓGICA DO ESTADO DO RIO DE JANEIRO -- FAETERJ/PARACAMBI
+    FACULDADE DE EDUCAÇÃO TECNOLÓGICA DO ESTADO DO RIO DE JANEIRO -- \\
+    FAETERJ/PARACAMBI
 }
 \tipotrabalho{Trabalho de Conclusão de Curso}
 \orientador{Professor Gilberto Oliveira Filho}
 
-\preambulo{Trabalho de Conclusão de Curso apresentado à Faculdade de Educação Tecnológica do Estado do Rio de Janeiro -- FAETERJ, como requisito parcial para obtenção do grau de Bacharel em Sistemas de Informação.\\[0.5cm]Linha de pesquisa: Engenharia de Software Aplicada a Dados / Sistemas Inteligentes}
+\preambulo{Trabalho de Conclusão de Curso (TCC) apresentado ao Curso Superior de Tecnologia em Sistemas de Informação da Faculdade de Educação Tecnológica do Estado do Rio de Janeiro, campus Paracambi -- FAETERJ/Paracambi, como requisito parcial para a obtenção do grau de Tecnólogo em Sistemas de Informação.}
 
 % ==============================================================================
 % INÍCIO DO DOCUMENTO
@@ -90,6 +98,68 @@
 % Retira espaço extra obsoleto entre as frases
 \frenchspacing
 
+% Redefine a capa: instituição no topo (no lugar do nome do autor),
+% nome do autor abaixo, título em maiúsculo, local e data ao final.
+\renewcommand{\imprimircapa}{%
+  \begin{capa}%
+    \center
+    \ABNTEXchapterfont\imprimirinstituicao
+
+    \vfill
+    \ABNTEXchapterfont\large\imprimirautor
+
+    \vfill
+    \begin{center}
+    \ABNTEXchapterfont\bfseries\LARGE\MakeUppercase{\imprimirtitulo}
+    \end{center}
+    \vfill
+
+    \large\imprimirlocal
+
+    \large\imprimirdata
+
+    \vspace*{1cm}
+  \end{capa}
+}
+
+% Redefine a folha de rosto: título em maiúsculo (igual à capa) e remove
+% a reimpressão da instituição (que já aparece na capa, evitando repetição).
+\makeatletter
+\renewcommand{\folhaderostocontent}{
+  \begin{center}
+
+    {\ABNTEXchapterfont\large\imprimirautor}
+
+    \vspace*{\fill}\vspace*{\fill}
+    \begin{center}
+      \ABNTEXchapterfont\bfseries\Large\MakeUppercase{\imprimirtitulo}
+    \end{center}
+    \vspace*{\fill}
+
+    \abntex@ifnotempty{\imprimirpreambulo}{%
+      \hspace{.45\textwidth}
+      \begin{minipage}{.5\textwidth}
+        \SingleSpacing
+        \imprimirpreambulo
+      \end{minipage}%
+      \vspace*{\fill}
+    }%
+
+    {\large\imprimirorientadorRotulo~\imprimirorientador\par}
+    \abntex@ifnotempty{\imprimircoorientador}{%
+       {\large\imprimircoorientadorRotulo~\imprimircoorientador}%
+    }%
+    \vspace*{\fill}
+
+    {\large\imprimirlocal}
+    \par
+    {\large\imprimirdata}
+    \vspace*{1cm}
+
+  \end{center}
+}
+\makeatother
+
 % ------------------------------------------------------------------
 % CAPA
 % ------------------------------------------------------------------
@@ -101,66 +171,17 @@
 \imprimirfolhaderosto
 
 % ------------------------------------------------------------------
-% FOLHA DE APROVACAO
-% ------------------------------------------------------------------
-\begin{folhadeaprovacao}
-
-    \begin{center}
-        {\ABNTEXchapterfont\large\imprimirautor}
-
-        \vspace*{\fill}
-        \begin{center}
-            \ABNTEXchapterfont\bfseries\imprimirtitulo
-        \end{center}
-        \vspace*{\fill}
-
-        \hspace{.45\textwidth}
-        \begin{minipage}{.5\textwidth}
-            \imprimirpreambulo
-        \end{minipage}%
-        \vspace*{\fill}
-    \end{center}
-
-    Trabalho de Conclusão de Curso aprovado em \underline{\hspace{2cm}} de \underline{\hspace{3cm}} de 2026.
-
-    \assinatura{\textbf{Professor Gilberto Oliveira Filho} \\ Orientador \\ FAETERJ/PARACAMBI}
-    \assinatura{\textbf{Prof. Dr. Nome do Avaliador 1} \\ Membro da banca \\ FAETERJ}
-    \assinatura{\textbf{Prof. Dr. Nome do Avaliador 2} \\ Membro da banca \\ FAETERJ}
-
-    \begin{center}
-        \vspace{0.5cm}
-        {\imprimirlocal}
-        \par
-        {\imprimirdata}
-        \vspace*{1cm}
-    \end{center}
-
-\end{folhadeaprovacao}
-
-% ------------------------------------------------------------------
 % DEDICATORIA
 % ------------------------------------------------------------------
 \begin{dedicatoria}
 \vspace*{\fill}
-\centering
-\noindent
-Dedico este trabalho à minha família, pelo apoio incondicional,\par
-e a todos que contribuíram para minha formação acadêmica e profissional.
-\vspace*{\fill}
+\begin{adjustwidth}{7cm}{0cm}
+\raggedleft\itshape
+Dedico este trabalho à minha família, que sempre torceu por mim, e à minha parceira de vida, Izabelle.\par
+Por fim, dedico ao Professor Gilberto Oliveira Filho, por todo o apoio e suporte.\par
+Obrigada a todos que de alguma forma me moldaram e me incentivaram até hoje.
+\end{adjustwidth}
 \end{dedicatoria}
-
-% ------------------------------------------------------------------
-% AGRADECIMENTOS
-% ------------------------------------------------------------------
-\begin{agradecimentos}
-Agradeço primeiramente a Deus, pela força e perseverança ao longo desta jornada.
-
-Agradeço ao meu orientador, Professor Gilberto Oliveira Filho, pelo acompanhamento, pelas contribuições técnicas e pela confiança no desenvolvimento deste trabalho.
-
-Agradeço aos professores da FAETERJ, colegas e amigos, pela troca de conhecimento e apoio durante o curso.
-
-Por fim, agradeço à minha família, pelo suporte contínuo em todos os momentos.
-\end{agradecimentos}
 
 % ------------------------------------------------------------------
 % RESUMO
@@ -283,7 +304,7 @@ Não foram identificados, na literatura acadêmica ou nas ferramentas de mercado
 
 Vale notar que a comunidade de profissionais de BI já tem explorado a combinação de MCP com IA de forma \textit{ad hoc}. Relatos em fóruns técnicos descrevem o uso do MCP for Power BI no VS Code para análise de DAX e edição de modelos assistida por IA, bem como o uso de LLMs em pipelines de dados para tarefas como reformatação de dados e validação de formatos. Contudo, esses usos são manuais, não reprodutíveis e sensíveis à qualidade do prompt: conforme observado por praticantes, ``se você não for rigoroso e conciso com seu prompt (por exemplo, fornecendo esquemas de exemplo), ele não será consistente''. O agente proposto neste trabalho sistematiza e automatiza esse processo, eliminando a variabilidade da abordagem manual.
 
-A dificuldade de versionamento em Power BI é tão conhecida na indústria que há artigos com títulos como \textit{``Ending the Nightmare of Power BI Versioning''}, publicados por profissionais da área descrevendo seus desafios do dia a dia \cite{chappell2024versioning}. Especialistas em consultoria de Fortune 500 descrevem que tratar modelos semânticos como produtos gerenciados exige versionamento, documentação, certificação, testes de qualidade e gestão de ciclo de vida \cite{powerbiconsulting2026bestpractices}. Em organizações grandes, times de BI constroem datasets separados para cada dashboard, levando a números inconsistentes, trabalho duplicado e lógica conflitante \cite{codecreators2024chaos}.
+A dificuldade de versionamento em Power BI é tão conhecida na indústria que há artigos com títulos como \textit{``Ending the Nightmare of Power BI Versioning''}, publicados por profissionais da área descrevendo seus desafios do dia a dia \cite{plotnikov2024versioning}. Especialistas em consultoria de Fortune 500 descrevem que tratar modelos semânticos como produtos gerenciados exige versionamento, documentação, certificação, testes de qualidade e gestão de ciclo de vida \cite{powerbiconsulting2026bestpractices}. Em organizações grandes, times de BI constroem datasets separados para cada dashboard, levando a números inconsistentes, trabalho duplicado e lógica conflitante \cite{codecreators2024chaos}.
 
 Estudos empíricos publicados na ACM avaliaram a qualidade do código refatorado por modelos como GPT-4o, GPT-4o-mini, LLaMA 3 e DeepSeek-v3, investigando se LLMs conseguem melhorar qualidade sem alterar funcionalidades externas \cite{cordeiro2024llmrefactor}. Pesquisas mostram que LLMs performam melhor quando contextualizados por análise estática do ambiente \cite{zhang2024staticllm}, o que justifica tecnicamente a integração do agente com o MCP Server para obter o grafo de dependências antes de chamar o LLM. Um \textit{position paper} do ICSE 2025 aponta que automação de refatoração via LLM carrega o risco de introduzir erros e alucinações \cite{icse2025llmrefactor}, justificando diretamente o módulo de validação sintática implementado neste trabalho.
 
@@ -300,7 +321,7 @@ Projetar, implementar e avaliar um agente computacional para análise preditiva 
 \begin{enumerate}
     \item \textbf{OE1: Extração e modelagem de metadados.} Implementar extração automatizada de modelos semânticos (.pbit) e construção de grafo de dependências com NetworkX, explorando integração com Power BI Modeling MCP Server para operações avançadas quando disponível.
 
-    \item \textbf{OE2: Desenvolvimento do módulo de descoberta de dependências.} Implementar algoritmo de análise de impacto que, dada uma mudança proposta (renomeio de coluna, tabela ou medida), identifique todos os objetos impactados através de travessia de grafo, incluindo dependências diretas e em cascata.
+    \item \textbf{OE2: Desenvolvimento do módulo de descoberta de dependências.} Implementar algoritmo de análise de impacto que, dada uma mudança proposta (renomeio de coluna, tabela ou medida; ou deleção de coluna ou tabela), identifique todos os objetos impactados através de travessia de grafo, incluindo dependências diretas e em cascata.
 
     \item \textbf{OE3: Desenvolvimento do módulo de refatoração com LLM.} Projetar engenharia de prompt específica para refatoração de expressões DAX e implementar integração com múltiplos provedores de LLM (Groq/Llama 3, OpenAI/GPT-4o, Anthropic/Claude 3.5 Sonnet), incluindo tratamento de contexto, templates estruturados e sistema de retry.
 
@@ -308,12 +329,12 @@ Projetar, implementar e avaliar um agente computacional para análise preditiva 
 
     \item \textbf{OE5: Integração e orquestração.} Construir agente orquestrador que execute o pipeline completo (descoberta $\rightarrow$ refatoração $\rightarrow$ validação $\rightarrow$ write-back), suportando modo offline com persistência em arquivo .pbit e modo online com transações via MCP Server.
 
-    \item \textbf{OE6: Avaliação experimental.} Conduzir experimento controlado com casos de teste de gabarito conhecido, medindo acurácia exata e parcial da refatoração, tempo de resposta e taxa de erro em cenários de renomeio de coluna, tabela e medida.
+    \item \textbf{OE6: Avaliação experimental.} Conduzir experimento controlado com casos de teste de gabarito conhecido, medindo, em duas fases distintas, a acurácia da análise de impacto e a acurácia da aplicação (correção automática para renomeios; bloqueio correto da aplicação para deleções com dependência ativa), além do tempo de resposta e da taxa de erro, em cenários de renomeio de coluna, tabela e medida, e de deleção de coluna e tabela.
 \end{enumerate}
 
 \section{Organização do Trabalho}
 
-Este trabalho está organizado em seis capítulos. O Capítulo 2 apresenta o referencial teórico, abordando os conceitos fundamentais sobre Power BI, DAX, Model Context Protocol, Large Language Models e Design Science Research. O Capítulo 3 descreve a metodologia adotada. O Capítulo 4 detalha o desenvolvimento do agente proposto. O Capítulo 5 apresenta os resultados experimentais e a discussão. O Capítulo 6 encerra com as conclusões, limitações e trabalhos futuros.
+Este trabalho está organizado em seis capítulos. Após esta introdução, o Capítulo 2 apresenta o referencial teórico, abordando os conceitos fundamentais sobre Power BI, DAX, Model Context Protocol, Large Language Models e Design Science Research. Em seguida, a metodologia adotada é descrita no Capítulo 3, seguida pelo detalhamento do desenvolvimento do agente proposto no Capítulo 4. Os resultados experimentais e a discussão correspondente são apresentados no Capítulo 5, e o trabalho se encerra no Capítulo 6, com as conclusões, limitações e sugestões para trabalhos futuros.
 
 % ######################################################################
 % CAPÍTULO 2 - REFERENCIAL TEÓRICO
@@ -371,7 +392,7 @@ Os principais LLMs considerados neste trabalho são:
 
 Um agente inteligente é uma entidade computacional que percebe seu ambiente por meio de sensores e atua sobre ele por meio de atuadores, de forma autônoma e orientada a objetivos \cite{russell2021ai}. No contexto de sistemas baseados em LLM, o conceito de agente foi estendido para incluir modelos de linguagem que utilizam ferramentas externas (\textit{tool use}) para realizar tarefas complexas que vão além da geração de texto.
 
-Agentes baseados em LLM operam tipicamente em um ciclo de percepção-raciocínio-ação: o modelo recebe uma tarefa, raciocina sobre os passos necessários, seleciona e invoca ferramentas disponíveis, observa os resultados e decide o próximo passo. Esse padrão, conhecido como ReAct (\textit{Reasoning + Acting}), combina raciocínio em cadeia de pensamento com ações executáveis.
+Agentes baseados em LLM operam tipicamente em um ciclo de percepção-raciocínio-ação: o modelo recebe uma tarefa, raciocina sobre os passos necessários, seleciona e invoca ferramentas disponíveis, observa os resultados e decide o próximo passo. Esse padrão, conhecido como ReAct (\textit{Reasoning + Acting}) \cite{yao2023react}, combina raciocínio em cadeia de pensamento com ações executáveis.
 
 Na engenharia de software, agentes baseados em LLM têm sido aplicados em tarefas como refatoração de código, geração de testes, análise de vulnerabilidades e revisão de código. A principal vantagem é a capacidade de lidar com transformações que exigem compreensão semântica, como refatorar uma expressão DAX preservando sua lógica de negócio, em contraposição a transformações puramente sintáticas baseadas em regras.
 
@@ -414,6 +435,18 @@ Esta pesquisa classifica-se quanto à:
     \item \textbf{Objetivos:} Exploratória, por investigar a aplicação de LLMs em um domínio específico (refatoração de DAX) ainda não explorado na literatura;
     \item \textbf{Procedimentos:} Design Science Research (DSR) para o projeto e implementação do artefato, combinada com procedimento experimental para avaliação controlada.
 \end{itemize}
+
+\section{Fontes e Técnica de Coleta de Dados}
+
+Os dados que fundamentam a avaliação experimental deste trabalho (Capítulo 5) combinam três fontes complementares, o que reduz o risco de uma conclusão depender de uma única perspectiva:
+
+\begin{enumerate}
+    \item \textbf{Estrutura do modelo semântico:} a configuração de tabelas, colunas, medidas e relacionamentos sobre a qual os casos de teste são gerados. Trata-se de dado de terceiro grau, na classificação de Marconi e Lakatos \cite{marconi2022fundamentos} -- análise de um artefato já existente, sem interação direta com sujeitos de pesquisa;
+    \item \textbf{Execução determinística do módulo de descoberta (\texttt{ImpactAnalyzer}):} os objetos impactados por cada mudança proposta são identificados por travessia de grafo, sem qualquer intervenção humana ou geração de texto por LLM. Esta fonte produz a métrica de acurácia da Fase 1 (Análise de Impacto), reportada na Seção 5.2 deste documento;
+    \item \textbf{Saída do LLM (Groq/Llama 3.3 70B):} as expressões DAX refatoradas, produzidas por um sistema externo ao controle do autor, mediante prompt determinístico (temperatura 0,0). Esta fonte produz a métrica de acurácia da Fase 2 (Aplicação).
+\end{enumerate}
+
+A separação entre a Fase 1 (puramente determinística, sem LLM) e a Fase 2 (dependente do LLM) é deliberada: ela permite isolar o quanto da acurácia observada se deve à lógica de grafo implementada pelo autor e o quanto se deve à capacidade generativa do modelo de linguagem, mitigando parcialmente o viés de um único experimentador construir tanto os casos de teste quanto o artefato avaliado.
 
 \section{Etapas da Design Science Research}
 
@@ -459,7 +492,7 @@ O ciclo de pesquisa em DSR, conforme ilustrado na Figura~\ref{fig:fluxo-dsr}, se
 
 \section{Considerações Éticas}
 
-Este trabalho não envolve coleta de dados humanos, pesquisa com seres humanos ou dados pessoais sensíveis. Os modelos semânticos utilizados no experimento controlado foram construídos pelo autor com dados fictícios, inspirados nos modelos públicos Contoso e AdventureWorks fornecidos pela Microsoft para fins educacionais.
+Este trabalho não envolve coleta de dados humanos, pesquisa com seres humanos ou dados pessoais sensíveis. O modelo semântico utilizado no experimento controlado representa um cenário fictício de pipeline de CI/CD (Jenkins e Azure DevOps), com estrutura técnica (tabelas, colunas, medidas e relacionamentos) representativa de modelos reais desse domínio. Os nomes utilizados são técnicos e estruturais (ex: \texttt{Plataforma}, \texttt{Stage Name Alterado}), sem qualquer dado de negócio sensível, identificação de organizações ou informação confidencial.
 
 O código-fonte do agente desenvolvido foi disponibilizado publicamente sob licença MIT no repositório GitHub do projeto, permitindo reprodutibilidade e auditoria por terceiros. Não há conflitos de interesse a declarar.
 
@@ -467,7 +500,7 @@ O código-fonte do agente desenvolvido foi disponibilizado publicamente sob lice
 
 \subsection{Cenário 1: Renomeio de Coluna com Dependências em Cascata}
 
-Uma equipe de BI recebe a notificação de que a view de vendas foi atualizada. A coluna \texttt{qtd\_dias} foi renomeada para \texttt{total\_dias}. A coluna \texttt{período} (com acento) agora é \texttt{periodo} (sem acento). O modelo semântico contém 8 medidas, 3 colunas calculadas, 2 medidas com dependência indireta e 1 relacionamento baseado em \texttt{qtd\_dias}.
+Uma equipe de BI recebe a notificação de que a fonte de dados de pipelines de CI/CD foi atualizada. A coluna \texttt{Plataforma} da tabela \texttt{dGeral}, que identifica se cada execução de pipeline ocorreu no Jenkins ou no Azure DevOps, precisa ser renomeada para \texttt{PlataformaUpdated} para refletir uma mudança no esquema de origem. No modelo semântico real utilizado na avaliação experimental deste trabalho (Capítulo 5), essa coluna é referenciada direta ou indiretamente por diversas medidas, incluindo \texttt{Mediana Segundos}, \texttt{Mediana Jenkins DIFF}, \texttt{Mediana Segundos Build}, \texttt{Mediana Segundos Deploy}, \texttt{Mediana Segundos Package} e \texttt{Sistemas Distintos Jenkins}, configurando um cenário real de dependências em cascata.
 
 \textbf{Fluxo de valor do agente:}
 \begin{enumerate}
@@ -521,6 +554,8 @@ O agente segue uma arquitetura de pipeline com quatro estágios sequenciais, con
     \item \textbf{Aplicação:} As alterações validadas são aplicadas via write-back no arquivo \texttt{.pbit} (modo offline) ou via transação MCP (modo online).
 \end{enumerate}
 
+Para fins de avaliação experimental (Capítulo 5), esses quatro estágios são agrupados em duas fases funcionais. A \textbf{Fase 1 — Análise de Impacto} corresponde ao estágio de Discovery: trata-se de uma etapa puramente determinística, baseada em travessia do grafo de dependências, que não envolve chamadas ao LLM. A \textbf{Fase 2 — Aplicação} corresponde aos estágios de Refatoração, Validação e Aplicação: para mudanças de renomeio (coluna, tabela ou medida), essa fase delega ao LLM a geração da expressão corrigida; para mudanças de deleção (coluna ou tabela), o comportamento correto da Fase 2 é a recusa da aplicação automática sempre que a Fase 1 identificar dependências ativas, sinalizando a necessidade de revisão manual em vez de gerar uma correção arriscada. Essa separação permite avaliar isoladamente a qualidade da análise de impacto (independente do LLM) e a qualidade da aplicação propriamente dita (dependente do LLM apenas quando aplicável).
+
 Os principais padrões de projeto utilizados são: \textit{Abstract Factory} para criação de clientes LLM por provedor; \textit{Strategy} para seleção do template de prompt por tipo de mudança; e programação assíncrona (\texttt{async/await}) para processamento concorrente das chamadas ao LLM.
 
 A Tabela~\ref{tab:modulos} descreve os módulos e suas responsabilidades.
@@ -549,7 +584,7 @@ O módulo de Discovery é responsável por construir um grafo de dependências d
 
 \subsection{Grafo de Dependências}
 
-A classe \texttt{DependencyGraph} utiliza um grafo dirigido (\texttt{DiGraph}) da biblioteca NetworkX para representar as relações entre objetos do modelo semântico. Cada nó do grafo corresponde a um objeto semântico (tabela, coluna, medida ou coluna calculada), identificado por um ID no formato \texttt{tipo:tabela.nome}, por exemplo, \texttt{column:Sales.Amount} ou \texttt{measure:Total Sales}.
+A classe \texttt{DependencyGraph} utiliza um grafo dirigido (\texttt{DiGraph}) da biblioteca NetworkX para representar as relações entre objetos do modelo semântico. Cada nó do grafo corresponde a um objeto semântico (tabela, coluna, medida ou coluna calculada), identificado por um ID no formato \texttt{tipo:tabela.nome}, por exemplo, \texttt{column:dGeral.Plataforma} ou \texttt{measure:Mediana Segundos}.
 
 As arestas do grafo representam dois tipos de relação:
 
@@ -567,7 +602,7 @@ A detecção de referências é realizada por análise de expressões regulares 
 
 Para cada referência encontrada na expressão de um objeto, uma aresta é criada do objeto referenciador para o objeto referenciado. Isso permite, dado um objeto qualquer, identificar todos os objetos que dependem dele por travessia reversa do grafo.
 
-A Figura~\ref{fig:grafo-exemplo} ilustra um exemplo de grafo de dependências para o cenário de renomeio da coluna \texttt{Sales[Amount]}, mostrando as dependências diretas (medidas que referenciam a coluna) e em cascata (medidas que dependem de outras medidas impactadas).
+A Figura~\ref{fig:grafo-exemplo} ilustra um exemplo de grafo de dependências para o cenário de renomeio da coluna \texttt{dGeral[Plataforma]}, mostrando as dependências diretas (medidas que referenciam a coluna) e em cascata (medidas que dependem de outras medidas impactadas).
 
 \begin{figure}[H]
     \centering
@@ -588,7 +623,7 @@ A classe \texttt{ImpactAnalyzer} recebe o grafo de dependências e, dada uma mud
     \item \textbf{Impacto em cascata:} objetos que dependem de objetos diretamente impactados. Identificados por travessia recursiva do grafo a partir de cada impacto direto.
 \end{itemize}
 
-Para cada objeto diretamente impactado, o analisador gera uma sugestão de expressão refatorada por substituição textual simples (e.g., trocar \texttt{Sales[Amount]} por \texttt{Sales[SalesAmount]}). Essa sugestão serve como referência inicial; a refatoração definitiva é delegada ao LLM, que pode lidar com padrões mais complexos.
+Para cada objeto diretamente impactado, o analisador gera uma sugestão de expressão refatorada por substituição textual simples (e.g., trocar \texttt{dGeral[Plataforma]} por \texttt{dGeral[PlataformaUpdated]}). Essa sugestão serve como referência inicial; a refatoração definitiva é delegada ao LLM, que pode lidar com padrões mais complexos.
 
 Adicionalmente, o analisador identifica relacionamentos (\texttt{RelationshipInfo}) que envolvem a coluna ou tabela modificada, pois esses também precisam ser atualizados.
 
@@ -913,7 +948,7 @@ A Tabela~\ref{tab:manual-vs-agente} compara o processo manual com o agente propo
         Melhor aplicação           & Alta criticidade & Lotes grandes \\
         \bottomrule
     \end{tabularx}
-    \par\vspace{0.3cm}\footnotesize $^{a}$ Estimativa baseada em relatos de profissionais de BI (\citeonline{chappell2024versioning}; \citeonline{powerbiconsulting2026bestpractices}), não mensurada experimentalmente neste trabalho.
+    \par\vspace{0.3cm}\footnotesize $^{a}$ Estimativa baseada em relatos de profissionais de BI (\citeonline{plotnikov2024versioning}; \citeonline{powerbiconsulting2026bestpractices}), não mensurada experimentalmente neste trabalho.
 \end{table}
 
 \subsection{Comparação com Funcionalidades Nativas}
