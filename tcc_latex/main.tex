@@ -37,10 +37,26 @@
 % Comando para fonte de figuras e tabelas (ABNT)
 \providecommand{\fonte}[1]{\vspace{-0.3cm}\par\footnotesize Fonte: #1}
 
-% Uniformiza a fonte de capa, capítulos e seções para Times (rmfamily),
-% sobrescrevendo o padrão sans-serif (\sffamily) do abntex2
-\renewcommand{\ABNTEXchapterfont}{\rmfamily}
-\renewcommand{\ABNTEXsectionfont}{\rmfamily}
+% Uniformiza a fonte de capa, capítulos e seções para Times (rmfamily)
+% em negrito, sobrescrevendo o padrão sans-serif sem negrito (\sffamily)
+% do abntex2. O negrito é necessário porque, ao uniformizar o tamanho
+% (ver abaixo), o único destaque visual que resta entre um título de
+% seção e o corpo do texto é o negrito + maiúsculas, conforme a norma.
+\renewcommand{\ABNTEXchapterfont}{\rmfamily\bfseries}
+\renewcommand{\ABNTEXsectionfont}{\rmfamily\bfseries}
+
+% Uniformiza o TAMANHO de todos os títulos (capítulo, parte, seção,
+% subseção) para 12pt (\normalsize), conforme a letra da norma ABNT
+% (NBR 14724), que recomenda fonte tamanho 12 para todo o trabalho,
+% diferenciando os níveis apenas por negrito/maiúsculas, não por tamanho.
+% Sem esta redefinição, o abntex2 usa por padrão \Huge (capítulo),
+% \Large (seção) e \large (subseção), produzindo títulos visualmente
+% maiores que o corpo do texto.
+\renewcommand{\ABNTEXchapterfontsize}{\normalsize}
+\renewcommand{\ABNTEXsectionfontsize}{\normalsize}
+\renewcommand{\ABNTEXsubsectionfontsize}{\normalsize}
+\renewcommand{\ABNTEXsubsubsectionfontsize}{\normalsize}
+\renewcommand{\ABNTEXsubsubsubsectionfontsize}{\normalsize}
 
 % ==============================================================================
 % CONFIGURAÇÃO DE CÓDIGO-FONTE
@@ -76,13 +92,13 @@
     GOVERNO DO ESTADO DO RIO DE JANEIRO \\
     SECRETARIA DE ESTADO CIÊNCIA E TECNOLOGIA \\
     FUNDAÇÃO DE APOIO À ESCOLA TÉCNICA \\
-    FACULDADE DE EDUCAÇÃO TECNOLÓGICA DO ESTADO DO RIO DE JANEIRO -- \\
+    FACULDADE DE EDUCAÇÃO TECNOLÓGICA DO ESTADO DO RIO DE JANEIRO, \\
     FAETERJ/PARACAMBI
 }
 \tipotrabalho{Trabalho de Conclusão de Curso}
 \orientador{Professor Gilberto Oliveira Filho}
 
-\preambulo{Trabalho de Conclusão de Curso (TCC) apresentado ao Curso Superior de Tecnologia em Sistemas de Informação da Faculdade de Educação Tecnológica do Estado do Rio de Janeiro, campus Paracambi -- FAETERJ/Paracambi, como requisito parcial para a obtenção do grau de Tecnólogo em Sistemas de Informação.}
+\preambulo{Trabalho de Conclusão de Curso (TCC) apresentado ao Curso Superior de Tecnologia em Sistemas de Informação da Faculdade de Educação Tecnológica do Estado do Rio de Janeiro, campus Paracambi, FAETERJ/Paracambi, como requisito parcial para a obtenção do grau de Tecnólogo em Sistemas de Informação.}
 
 % ==============================================================================
 % INÍCIO DO DOCUMENTO
@@ -190,7 +206,7 @@ Obrigada a todos que de alguma forma me moldaram e me incentivaram até hoje.
     Modelos semânticos do Power BI são a espinha dorsal da tomada de decisão em organizações modernas. Mudanças estruturais nesses modelos, como renomeio de colunas, substituição de tabelas ou padronização de nomenclaturas, geram um processo manual, propenso a erros e de alto custo. Este trabalho propõe projetar, implementar e avaliar um agente computacional para análise preditiva de impacto e refatoração semiautomática de modelos semânticos Power BI, integrando o Power BI Modeling MCP Server e Large Language Models (LLMs). A pesquisa segue o paradigma da Design Science Research (DSR). O artefato implementa um pipeline composto por descoberta de dependências via grafo, refatoração assistida por LLM e validação sintática automatizada, com suporte a aplicação transacional via MCP. No experimento controlado com 14 casos de teste, o agente alcançou acurácia exata de 78,6\%, confiança média de 92,86\%, tempo médio de 4,96 segundos por refatoração e taxa de erro de 0,0\%. Os resultados evidenciam viabilidade técnica do uso de LLMs para apoiar a manutenção de modelos semânticos Power BI, com ganho de produtividade e rastreabilidade, embora ainda seja recomendada revisão humana em cenários críticos.
 
     \vspace{\onelineskip}
-    \noindent\textbf{Palavras-chave}: Power BI. Modelos Semânticos. DAX. Large Language Models. Model Context Protocol. Análise de Impacto. Refatoração Automatizada. Agentes Inteligentes.
+    \noindent\textbf{Palavras-chave}: Power BI. Large Language Models. Model Context Protocol. Análise de Impacto. Refatoração Automatizada.
 \end{resumo}
 
 % ------------------------------------------------------------------
@@ -201,7 +217,7 @@ Obrigada a todos que de alguma forma me moldaram e me incentivaram até hoje.
         Power BI semantic models are the backbone of decision-making in modern organizations. Structural changes to these models, such as column renaming, table replacement, or naming standardization, generate a manual, error-prone, and costly process. This work proposes to design, implement, and evaluate a computational agent for predictive impact analysis and semi-automatic refactoring of Power BI semantic models, integrating the Power BI Modeling MCP Server and Large Language Models (LLMs). The research follows the Design Science Research (DSR) paradigm. The artifact implements a pipeline composed of graph-based dependency discovery, LLM-assisted refactoring, and automated syntactic validation, with transactional application support via MCP. In a controlled experiment with 14 test cases, the agent achieved 78.6\% exact accuracy, 92.86\% average confidence, 4.96 seconds average response time per refactoring, and 0.0\% system error rate. Results demonstrate the technical feasibility of using LLMs to support Power BI semantic model maintenance, improving productivity and traceability, while still requiring human review in critical scenarios.
 
         \vspace{\onelineskip}
-        \noindent\textbf{Keywords}: Power BI. Semantic Models. DAX. Large Language Models. Model Context Protocol. Impact Analysis. Automated Refactoring. Intelligent Agents.
+        \noindent\textbf{Keywords}: Power BI. Large Language Models. Model Context Protocol. Impact Analysis. Automated Refactoring.
     \end{otherlanguage*}
 \end{resumo}
 
@@ -258,15 +274,17 @@ Obrigada a todos que de alguma forma me moldaram e me incentivaram até hoje.
 % ######################################################################
 \chapter{INTRODUÇÃO}
 
-Modelos semânticos do Power BI são a espinha dorsal da tomada de decisão em organizações modernas. Esses modelos são compostos por tabelas, colunas, medidas, colunas calculadas e relacionamentos, evoluindo constantemente para refletir mudanças nos sistemas de origem e nos requisitos de negócio.
+Modelos semânticos do Power BI são a espinha dorsal da tomada de decisão em organizações modernas. Esses modelos são compostos por tabelas, colunas, medidas, colunas calculadas e relacionamentos, evoluindo constantemente para refletir mudanças nos sistemas de origem e nos requisitos de negócio. Manter essa estrutura íntegra ao longo do tempo é um desafio crescente: uma única mudança estrutural, como renomear uma coluna, substituir uma tabela ou padronizar uma nomenclatura, pode propagar-se por dezenas de medidas e expressões DAX interdependentes, e hoje essa propagação é rastreada e corrigida manualmente, objeto por objeto.
 
-O presente trabalho propõe o projeto, implementação e avaliação de um agente computacional capaz de analisar preditivamente o impacto de mudanças estruturais em modelos semânticos Power BI e refatorar semiautomaticamente as expressões DAX afetadas, utilizando Large Language Models (LLMs) e o Power BI Modeling MCP Server.
+O presente trabalho propõe o projeto, implementação e avaliação de um agente computacional capaz de analisar preditivamente o impacto de mudanças estruturais em modelos semânticos Power BI, sobre tabelas, colunas e medidas, e de refatorar semiautomaticamente todos os objetos afetados, incluindo expressões DAX, utilizando Large Language Models (LLMs) e o Power BI Modeling MCP Server.
 
 \section{Contextualização}
 
-O Power BI consolidou-se como uma das principais plataformas de Business Intelligence do mercado. Organizações de todos os portes utilizam modelos semânticos para consolidar regras de negócio, métricas e indicadores em uma camada analítica unificada.
+O Power BI consolidou-se como uma das principais plataformas de Business Intelligence do mercado: pelo 17º ano consecutivo, a Microsoft foi posicionada como Líder no Gartner Magic Quadrant para Plataformas de Analytics e Business Intelligence \cite{gartner2024magicquadrant}, relatório que avalia fornecedores globais com base em capacidade de execução e completude de visão. Organizações de todos os portes utilizam modelos semânticos para consolidar regras de negócio, métricas e indicadores em uma camada analítica unificada.
 
-Com o crescimento dos modelos, a manutenção torna-se cada vez mais complexa. Uma simples mudança estrutural, como o renomeio de uma coluna na fonte de dados, pode afetar dezenas de expressões DAX interconectadas.
+Por trás da interface visual do Power BI, cada modelo semântico é processado por um motor analítico colunar em memória (VertiPaq) e representado internamente por um modelo de objetos tabular, o Tabular Object Model (TOM), serializado em arquivos no formato TMDL (Tabular Model Definition Language). É nessa camada, composta por tabelas, colunas, medidas e relacionamentos definidos em DAX, que residem as regras de negócio do modelo, e é sobre essa estrutura que o presente trabalho atua.
+
+Com o crescimento dos modelos, a manutenção dessa estrutura torna-se cada vez mais complexa. Uma simples mudança estrutural, como o renomeio de uma coluna na fonte de dados, pode afetar dezenas de medidas, colunas calculadas e relacionamentos interconectados.
 
 \section{Problema}
 
@@ -279,7 +297,7 @@ Toda vez que uma coluna é renomeada, uma tabela é substituída ou uma nomencla
     \item Aplicar as mudanças em produção, muitas vezes aos poucos, com medo de causar indisponibilidade.
 \end{itemize}
 
-Embora a Microsoft já forneça, via Power BI Modeling MCP Server, acesso programático completo ao modelo semântico (TOM/TMDL), incluindo operações em lote, transações isoladas, execução de consultas DAX para validação, captura de traces e erros, e análise de dependências entre objetos, não existe, na literatura acadêmica ou nas ferramentas de mercado, um agente que orquestre essas capacidades de forma integrada para: predizer o impacto de uma mudança antes de executá-la, refatorar automaticamente as expressões impactadas com suporte de LLMs, validar cada alteração com testes automatizados e aplicar as correções em lote, de forma atômica e reversível.
+O Power BI Modeling MCP Server, disponibilizado pela própria Microsoft, fornece acesso programático ao modelo semântico (TOM/TMDL): operações em lote, transações isoladas, execução de consultas DAX para validação e captura de erros. Essa camada de execução resolve o problema de \textit{como} aplicar uma mudança de forma segura e atômica, mas não resolve o problema anterior a ela: \textit{o que} precisa ser alterado, e em que ordem, para que a mudança não quebre a lógica de negócio. Identificar essas dependências e gerar a correção de cada objeto afetado continua sendo trabalho manual do analista de BI, repetido a cada renomeio, substituição ou padronização de nomenclatura. Não foi identificada, na literatura acadêmica nem nas ferramentas de mercado disponíveis até a elaboração deste trabalho, uma solução que combine análise preditiva de impacto com geração assistida por LLM da correção propriamente dita.
 
 \section{Pergunta de Pesquisa}
 
@@ -298,7 +316,7 @@ A manutenção de modelos semânticos Power BI representa um custo significativo
 
 A relevância deste trabalho é reforçada pela própria direção que a Microsoft tem dado ao ecossistema Power BI. Na atualização de março de 2026, a empresa introduziu a exibição TMDL na modelagem web, permitindo que desenvolvedores criem scripts, modifiquem e apliquem alterações a objetos de modelo diretamente em um editor de código usando a Tabular Model Definition Language \cite{microsoft2026pbimarco}. Essa funcionalidade evidencia a migração do ecossistema para uma abordagem \textit{code-first} na gestão de modelos semânticos, exatamente a premissa sobre a qual o agente proposto neste trabalho se constrói.
 
-Adicionalmente, a mesma atualização introduziu funções definidas pelo usuário (UDFs) em DAX com rastreamento automático de dependência quando tabelas, colunas ou medidas são renomeadas \cite{microsoft2026daxudf}. Porém, esse rastreamento nativo é limitado ao escopo de UDFs, não abrangendo medidas e colunas calculadas convencionais, que constituem a grande maioria dos objetos em modelos semânticos reais. O agente proposto neste trabalho endereça essa lacuna ao oferecer análise de impacto e refatoração para \textbf{todos} os tipos de objetos DAX.
+Adicionalmente, a mesma atualização introduziu funções definidas pelo usuário (UDFs) em DAX com rastreamento automático de dependência \cite{microsoft2026daxudf}, um sinal claro de que a própria Microsoft reconhece a necessidade de automatizar a análise de impacto. Esse rastreamento, no entanto, não cobre medidas e colunas calculadas convencionais (Seção~\ref{sec:comparacao-nativas}), que constituem a grande maioria dos objetos em modelos semânticos reais.
 
 Não foram identificados, na literatura acadêmica ou nas ferramentas de mercado, agentes que integrem análise preditiva de impacto, refatoração via LLM e validação automatizada em um fluxo único e transacional. A combinação de Model Context Protocol (MCP) com Large Language Models para esse fim representa uma contribuição original tanto técnica quanto empírica.
 
@@ -332,6 +350,10 @@ Projetar, implementar e avaliar um agente computacional para análise preditiva 
     \item \textbf{OE6: Avaliação experimental.} Conduzir experimento controlado com casos de teste de gabarito conhecido, medindo, em duas fases distintas, a acurácia da análise de impacto e a acurácia da aplicação (correção automática para renomeios; bloqueio correto da aplicação para deleções com dependência ativa), além do tempo de resposta e da taxa de erro, em cenários de renomeio de coluna, tabela e medida, e de deleção de coluna e tabela.
 \end{enumerate}
 
+\section{Metodologia Resumida}
+
+Para responder à pergunta de pesquisa, este trabalho segue o paradigma da Design Science Research (DSR), combinando abordagem qualitativa (análise dos erros e padrões de falha do LLM) e quantitativa (métricas de acurácia, tempo de resposta e taxa de erro). O artefato proposto, um agente computacional, é projetado, implementado em Python e avaliado por meio de um experimento controlado sobre um modelo semântico real, em que mudanças estruturais conhecidas (renomeio e deleção de colunas, tabelas e medidas) são aplicadas e o comportamento do agente é comparado a um gabarito gerado por substituição textual determinística. Os procedimentos completos de coleta e análise são detalhados no Capítulo 3.
+
 \section{Organização do Trabalho}
 
 Este trabalho está organizado em seis capítulos. Após esta introdução, o Capítulo 2 apresenta o referencial teórico, abordando os conceitos fundamentais sobre Power BI, DAX, Model Context Protocol, Large Language Models e Design Science Research. Em seguida, a metodologia adotada é descrita no Capítulo 3, seguida pelo detalhamento do desenvolvimento do agente proposto no Capítulo 4. Os resultados experimentais e a discussão correspondente são apresentados no Capítulo 5, e o trabalho se encerra no Capítulo 6, com as conclusões, limitações e sugestões para trabalhos futuros.
@@ -355,7 +377,7 @@ Essas iniciativas evidenciam uma transição para abordagens \textit{code-first}
 
 DAX (Data Analysis Expressions) é a linguagem de fórmulas utilizada em modelos semânticos Power BI para definir medidas, colunas calculadas e tabelas calculadas \cite{russo2022dax}. A linguagem opera sobre dois conceitos fundamentais: o contexto de filtro e o contexto de linha, cuja interação determina o resultado das expressões.
 
-A complexidade de manutenção cresce com o modelo: uma medida pode referenciar colunas, outras medidas e funções iteradoras, criando cadeias de dependência que não são visíveis na interface padrão do Power BI Desktop. A atualização de março de 2026 introduziu funções definidas pelo usuário (UDFs) em DAX, incluindo rastreamento automático de dependência quando tabelas, colunas ou medidas são renomeadas \cite{microsoft2026daxudf}. Contudo, esse rastreamento se aplica exclusivamente a UDFs; medidas e colunas calculadas tradicionais permanecem sem suporte nativo a análise de impacto, evidenciando a lacuna que este trabalho busca preencher.
+A complexidade de manutenção cresce com o modelo: uma medida pode referenciar colunas, outras medidas e funções iteradoras, criando cadeias de dependência que não são visíveis na interface padrão do Power BI Desktop. A atualização de março de 2026 introduziu funções definidas pelo usuário (UDFs) em DAX com rastreamento automático de dependência \cite{microsoft2026daxudf}, mas esse suporte nativo não se estende a medidas e colunas calculadas tradicionais (Seção~\ref{sec:comparacao-nativas}).
 
 \section{Model Context Protocol (MCP)}
 
@@ -441,7 +463,7 @@ Esta pesquisa classifica-se quanto à:
 Os dados que fundamentam a avaliação experimental deste trabalho (Capítulo 5) combinam três fontes complementares, o que reduz o risco de uma conclusão depender de uma única perspectiva:
 
 \begin{enumerate}
-    \item \textbf{Estrutura do modelo semântico:} a configuração de tabelas, colunas, medidas e relacionamentos sobre a qual os casos de teste são gerados. Trata-se de dado de terceiro grau, na classificação de Marconi e Lakatos \cite{marconi2022fundamentos} -- análise de um artefato já existente, sem interação direta com sujeitos de pesquisa;
+    \item \textbf{Estrutura do modelo semântico:} a configuração de tabelas, colunas, medidas e relacionamentos sobre a qual os casos de teste são gerados. Trata-se de dado de terceiro grau, na classificação de Marconi e Lakatos \cite{marconi2022fundamentos}: análise de um artefato já existente, sem interação direta com sujeitos de pesquisa;
     \item \textbf{Execução determinística do módulo de descoberta (\texttt{ImpactAnalyzer}):} os objetos impactados por cada mudança proposta são identificados por travessia de grafo, sem qualquer intervenção humana ou geração de texto por LLM. Esta fonte produz a métrica de acurácia da Fase 1 (Análise de Impacto), reportada na Seção 5.2 deste documento;
     \item \textbf{Saída do LLM (Groq/Llama 3.3 70B):} as expressões DAX refatoradas, produzidas por um sistema externo ao controle do autor, mediante prompt determinístico (temperatura 0,0). Esta fonte produz a métrica de acurácia da Fase 2 (Aplicação).
 \end{enumerate}
@@ -952,6 +974,7 @@ A Tabela~\ref{tab:manual-vs-agente} compara o processo manual com o agente propo
 \end{table}
 
 \subsection{Comparação com Funcionalidades Nativas}
+\label{sec:comparacao-nativas}
 
 É relevante comparar a abordagem proposta com as funcionalidades nativas introduzidas pela Microsoft. A atualização de março de 2026 do Power BI adicionou rastreamento automático de dependência para funções definidas pelo usuário (UDFs) em DAX, mantendo o código em sincronia quando tabelas, colunas ou medidas são renomeadas \cite{microsoft2026daxudf}. Essa funcionalidade, entretanto, apresenta limitações importantes:
 
