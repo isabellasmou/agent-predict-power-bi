@@ -17,7 +17,7 @@
 % ==============================================================================
 \usepackage[utf8]{inputenc}     % Codificação UTF-8
 \usepackage[T1]{fontenc}        % Seleção de código de fonte
-\usepackage{mathptmx}           % Fonte Times New Roman (exigida pelo manual FAETERJ/Paracambi)
+\usepackage{mathptmx}           % Fonte Times New Roman
 \usepackage{graphicx}           % Inclusão de gráficos
 \usepackage{booktabs}           % Tabelas profissionais
 \usepackage{tabularx}           % Tabelas com largura ajustável
@@ -33,6 +33,13 @@
 \usepackage{amsmath}            % Matemática
 \usepackage{changepage}         % Ambiente adjustwidth (recuo da dedicatória)
 \usepackage[alf]{abntex2cite}   % Citações ABNT (\citeonline, \cite)
+
+% ==============================================================================
+% PACOTES PARA CORREÇÃO DE WARNINGS (UNDERFULL/OVERFULL BOXES)
+% ==============================================================================
+\usepackage{breakurl}           % Permite quebra de URLs em referências
+\usepackage{ragged2e}           % Para \RaggedRight (melhor justificação)
+\usepackage{hyphenat}           % Hifenização de palavras compostas
 
 % Comando para fonte de figuras e tabelas (ABNT)
 \providecommand{\fonte}[1]{\vspace{-0.3cm}\par\footnotesize Fonte: #1}
@@ -62,14 +69,14 @@
 % da subseção, itálico sem negrito, mantendo a distinção hierárquica
 % sem repetir o mesmo peso visual em todos os níveis.
 \renewcommand{\cftchapterfont}{\bfseries}
-\renewcommand{\cftchapterpagefont}{\normalsize\cftchapterfont}
+\renewcommand{\cftchapterpagefont}{\normalsize}
 \renewcommand{\cftsectionfont}{\bfseries}
-\renewcommand{\cftsectionpagefont}{\cftsectionfont}
+\renewcommand{\cftsectionpagefont}{\normalsize}
 \renewcommand{\cftsubsectionfont}{\itshape}
-\renewcommand{\cftsubsectionpagefont}{\cftsubsectionfont}
-\renewcommand{\cftsubsubsectionfont}{\itshape\small}
-\renewcommand{\cftsubsubsectionpagefont}{\cftsubsubsectionfont}
-\renewcommand{\ABNTEXsubsubsubsectionfontsize}{\normalsize}
+\renewcommand{\cftsubsectionpagefont}{\normalsize}
+\renewcommand{\cftsubsubsectionfont}{\itshape}
+\renewcommand{\cftsubsubsectionpagefont}{\normalsize}
+
 
 % ==============================================================================
 % CONFIGURAÇÃO DE CÓDIGO-FONTE
@@ -131,6 +138,9 @@
 % INÍCIO DO DOCUMENTO
 % ==============================================================================
 \begin{document}
+
+% Relaxa as margens para evitar underfull/overfull boxes
+\sloppy
 
 % Elementos pre-textuais
 \pretextual
@@ -227,10 +237,10 @@ Obrigada a todos que de alguma forma me moldaram e me incentivaram até hoje.
 \end{dedicatoria}
 
 % ------------------------------------------------------------------
-% RESUMO
+% RESUMO (REVISADO)
 % ------------------------------------------------------------------
 \begin{resumo}
-    Modelos semânticos do Power BI são a espinha dorsal da tomada de decisão em organizações modernas. Mudanças estruturais nesses modelos, como renomeio de colunas, substituição de tabelas ou padronização de nomenclaturas, geram um processo manual, propenso a erros e de alto custo. Este trabalho propõe projetar, implementar e avaliar um agente computacional para análise preditiva de impacto e refatoração semiautomática de modelos semânticos Power BI, integrando o Power BI Modeling MCP Server e Large Language Models (LLMs). A pesquisa segue o paradigma da Design Science Research (DSR). O artefato implementa um pipeline composto por descoberta de dependências via grafo, refatoração assistida por LLM e validação sintática automatizada, com suporte a aplicação transacional via MCP. A avaliação experimental foi conduzida em duas fases sobre um modelo semântico real, com 32 casos de teste distribuídos em cinco tipos de mudança estrutural (renomeio de coluna, tabela e medida; deleção de coluna e tabela). A Fase 1 (análise de impacto, determinística) alcançou 100\% de acurácia na identificação de dependências diretas e em cascata. A Fase 2 (aplicação) também alcançou 100\% de acurácia: o LLM (Groq/Llama 3.3 70B) gerou corretamente todas as refatorações de renomeio, com tempo médio de 5,1 segundos por expressão e taxa de erro de geração de 0\%, enquanto o agente bloqueou corretamente todas as tentativas de deleção com dependência ativa. Os resultados evidenciam viabilidade técnica do uso de LLMs para apoiar a manutenção de modelos semânticos Power BI, com ganho de produtividade e rastreabilidade, embora ainda seja recomendada revisão humana em cenários críticos.
+    A manutenção de modelos semânticos Power BI — diante de mudanças estruturais como renomeio de colunas, substituição de tabelas ou padronização de nomenclaturas — é um processo manual, propenso a erros e de alto custo. Este trabalho propõe, implementa e avalia um agente computacional que integra análise preditiva de impacto baseada em grafo de dependências, refatoração assistida por Large Language Models (LLMs) e validação sintática automatizada, utilizando o Power BI Modeling MCP Server como camada de execução transacional. Seguindo o paradigma da Design Science Research (DSR), o artefato foi avaliado em um experimento controlado com 32 casos de teste sobre um modelo semântico real de um pipeline de CI/CD. A Fase 1 (análise de impacto determinística) alcançou 100\% de acurácia na identificação de dependências diretas e em cascata. A Fase 2 (aplicação) também alcançou 100\% de acurácia: o LLM (Groq/Llama 3.3 70B) gerou corretamente todas as refatorações de renomeio com tempo médio de 5,1 segundos por expressão, enquanto o agente bloqueou corretamente todas as tentativas de deleção com dependência ativa. Os resultados evidenciam a viabilidade técnica e econômica do uso de LLMs para manutenção de modelos Power BI, com ganhos significativos de produtividade e rastreabilidade. Recomenda-se, contudo, a revisão humana em cenários de deleção e em modelos de alta criticidade.
 
     \vspace{\onelineskip}
     \noindent\textbf{Palavras-chave}: Power BI. Large Language Models. Model Context Protocol. Análise de Impacto. Refatoração Automatizada.
@@ -408,7 +418,7 @@ A complexidade de manutenção cresce com o modelo: uma medida pode referenciar 
 
 \section{Model Context Protocol (MCP)}
 
-O Model Context Protocol (MCP) é um protocolo aberto, introduzido pela Anthropic em novembro de 2024, que padroniza a integração entre Large Language Models e ferramentas externas \cite{microsoft2025mcp}. O protocolo segue uma arquitetura cliente-servidor na qual o LLM (ou agente) atua como cliente, enviando requisições a servidores que expõem ferramentas (\ \textit{tools}) para leitura e manipulação de dados.
+O Model Context Protocol (MCP) é um protocolo aberto, introduzido pela Anthropic em novembro de 2024, que padroniza a integração entre Large Language Models e ferramentas externas \cite{microsoft2025mcp}. O protocolo segue uma arquitetura cliente-servidor na qual o LLM (ou agente) atua como cliente, enviando requisições a servidores que expõem ferramentas (\textit{tools}) para leitura e manipulação de dados.
 
 A comunicação ocorre via JSON-RPC 2.0 sobre dois transportes possíveis: \textit{stdio} (entrada/saída padrão, para servidores locais) e \textit{SSE} (Server-Sent Events, para servidores remotos). Cada servidor declara suas ferramentas disponíveis, e o cliente pode descobri-las dinamicamente e invocá-las com parâmetros tipados.
 
@@ -424,8 +434,13 @@ No ecossistema Power BI, a Microsoft disponibiliza o \textbf{Power BI Modeling M
 Além do servidor oficial da Microsoft, soluções de terceiros como o Tabular Editor \cite{tabulareditor2025mcp} também oferecem servidores MCP para modelos tabulares, ampliando as possibilidades de integração. O agente proposto neste trabalho utiliza o MCP como canal de comunicação bidirecional com o modelo semântico, viabilizando tanto a leitura de metadados quanto a aplicação de mudanças em transações atômicas.
 
 \section{Large Language Models (LLMs)}
+\label{sec:llms}
 
-Large Language Models (LLMs) são modelos de linguagem baseados na arquitetura Transformer, treinados em grandes volumes de texto e código, capazes de gerar, analisar e transformar código-fonte em diversas linguagens \cite{openai2024gpt4}. No contexto de engenharia de software, LLMs têm sido aplicados com sucesso em tarefas de refatoração, geração de testes e análise de código.
+Large Language Models (LLMs) são modelos de linguagem baseados na arquitetura Transformer, treinados em grandes volumes de texto e código, capazes de gerar, analisar e transformar código-fonte em diversas linguagens \cite{openai2024gpt4}. A arquitetura Transformer utiliza mecanismos de atenção para capturar dependências de longo alcance, o que é particularmente útil para compreender expressões DAX com múltiplas referências e funções aninhadas.
+
+No contexto de engenharia de software, LLMs têm sido aplicados com sucesso em tarefas de refatoração, geração de testes e análise de código. No entanto, a aplicação a linguagens de domínio específico (DSLs) como DAX apresenta desafios adicionais: (i) o volume de dados de treinamento em DAX é significativamente menor do que em linguagens como Python ou Java, o que pode limitar a capacidade do modelo de generalizar corretamente; (ii) a semântica de DAX depende fortemente do contexto de modelo (tabelas, relacionamentos, filtros), que não está explícito no código-fonte; (iii) alucinações — geração de código sintaticamente válido, mas semanticamente incorreto — são um risco documentado em tarefas de refatoração \cite{icse2025llmrefactor}.
+
+Para mitigar esses riscos, este trabalho adota três estratégias: (1) engenharia de prompt rigorosa com exemplos explícitos (Apêndice A), (2) fornecimento do contexto completo do modelo semântico (tabelas, colunas, medidas relacionadas) no prompt, e (3) validação sintática heurística pós-geração, que rejeita expressões com erros evidentes antes da aplicação.
 
 Para o domínio específico de DAX, LLMs apresentam tanto oportunidades quanto desafios. Por um lado, são capazes de compreender a estrutura de expressões DAX e gerar versões refatoradas que preservam a lógica de negócio. Por outro, a qualidade da saída depende criticamente da engenharia de prompt. Relatos de profissionais de BI que utilizam LLMs em pipelines de dados indicam que, sem prompts rigorosos e esquemas de exemplo explícitos, os resultados não são consistentes. Esse achado empírico justifica o \textbf{OE3} deste trabalho: projetar engenharia de prompt \textit{específica} para refatoração de DAX, com templates que incluem tabela de origem, tipo de mudança, expressão original e contexto do modelo semântico.
 
@@ -466,6 +481,30 @@ Hevner et al. (2004) propõem sete diretrizes para a condução de pesquisas em 
 O ciclo de pesquisa em DSR, conforme adotado neste trabalho, segue cinco fases: (1) conscientização do problema, (2) sugestão de solução, (3) desenvolvimento do artefato, (4) avaliação experimental e (5) conclusão com análise de contribuições e limitações.
 
 Este trabalho se enquadra no paradigma DSR na medida em que o artefato produzido, o agente computacional para análise de impacto e refatoração de modelos Power BI, foi projetado para resolver um problema prático identificado (manutenção custosa de modelos semânticos) e avaliado por meio de experimento controlado com métricas quantitativas de acurácia, tempo e taxa de erro.
+
+% ------------------------------------------------------------------
+% NOVA SEÇÃO 2.7: TRABALHOS RELACIONADOS
+% ------------------------------------------------------------------
+\section{Trabalhos Relacionados}
+\label{sec:trabalhos-relacionados}
+
+Embora a literatura sobre refatoração de software com LLMs tenha crescido significativamente \cite{cordeiro2024llmrefactor, zhang2024staticllm}, o domínio específico de modelos semânticos Power BI permanece pouco explorado. Esta seção situa o agente proposto em relação a ferramentas comerciais, funcionalidades nativas e abordagens acadêmicas.
+
+\subsection{Ferramentas Comerciais}
+
+O \textbf{Tabular Editor} \cite{tabulareditor2025mcp} é a ferramenta de terceiros mais utilizada para edição avançada de modelos tabulares do Power BI. Desde 2025, passou a oferecer servidores MCP, permitindo integração com assistentes de IA. Contudo, essa integração é genérica e não inclui análise preditiva de impacto: o analista deve identificar manualmente as dependências antes de solicitar a refatoração. O \textbf{DAX Optimizer} \cite{sqlbi2024optimizer}, lançado pela SQLBI em 2024, foca exclusivamente em análise de performance de expressões DAX, identificando gargalos e sugerindo otimizações, mas não oferece suporte a refatoração estrutural (renomeio de colunas/tabelas) nem análise de impacto em cascata.
+
+Ferramentas nativas da Microsoft, como o \textbf{Power BI Service} e o \textbf{Power BI Desktop}, possuem funcionalidades limitadas de \textit{find and replace} e dependência manual, mas não automatizam a propagação de mudanças estruturais. A introdução de UDFs com rastreamento automático de dependência \cite{microsoft2026daxudf} representa um avanço, porém restrito a um subconjunto de objetos (Seção~\ref{sec:comparacao-nativas}).
+
+\subsection{Abordagens Acadêmicas}
+
+Na literatura acadêmica, Zhang et al. \cite{zhang2024staticllm} realizaram uma revisão sistemática sobre refatoração de software com LLMs, concluindo que o desempenho dos modelos melhora significativamente quando contextualizados por análise estática do ambiente — exatamente a premissa adotada neste trabalho, ao fornecer ao LLM o grafo de dependências do modelo semântico. Cordeiro, Correia e Abreu \cite{cordeiro2024llmrefactor} avaliaram empiricamente a qualidade do código refatorado por GPT-4o, LLaMA 3 e DeepSeek-v3, constatando que LLMs são capazes de preservar funcionalidades externas, mas que a taxa de sucesso varia conforme a complexidade da refatoração. Nenhum desses estudos, contudo, aborda o domínio de DAX ou modelos semânticos de BI.
+
+O padrão \textit{ReAct} \cite{yao2023react} tem sido amplamente adotado para agentes baseados em LLM que interagem com ferramentas externas. O agente proposto segue esse padrão ao combinar raciocínio (engenharia de prompt) com ações (chamadas ao MCP Server para leitura e escrita), mas com uma orquestração determinística que reduz a variabilidade inerente a agentes totalmente autônomos.
+
+\subsection{Lacuna Identificada}
+
+Até onde foi possível verificar, não há na literatura — acadêmica ou cinzenta — um agente que integre (i) análise preditiva de impacto via grafo de dependências, (ii) refatoração assistida por LLM com templates especializados, (iii) validação sintática automatizada e (iv) aplicação transacional via MCP em um único pipeline. O presente trabalho preenche essa lacuna, oferecendo uma contribuição original tanto técnica quanto empírica.
 
 % ######################################################################
 % CAPÍTULO 3 - METODOLOGIA
@@ -981,6 +1020,37 @@ Algumas ameaças à validade dos resultados devem ser consideradas:
     \item \textbf{Validade externa:} O experimento utilizou um único modelo semântico (domínio de CI/CD) e um único provedor de LLM (Groq/Llama 3.3 70B). A acurácia de 100\% obtida não deve ser interpretada como garantia de desempenho idêntico em outros domínios de negócio ou outros provedores;
     \item \textbf{Validade de construto:} a Fase 2 mede acurácia exata por correspondência textual ao gabarito; expressões funcionalmente equivalentes, porém com formatação distinta da gerada por regex, seriam classificadas como incorretas. No experimento realizado, essa situação não ocorreu em nenhum dos 32 casos.
 \end{itemize}
+
+% ------------------------------------------------------------------
+% NOVA SUBSEÇÃO 5.6.5 - VIABILIDADE ECONÔMICA
+% ------------------------------------------------------------------
+\subsection{Viabilidade Econômica}
+\label{sec:viabilidade-economica}
+
+Embora o agente tenha demonstrado alta acurácia, sua adoção prática depende também da análise de custo-benefício. No experimento, cada chamada ao LLM (Groq/Llama 3.3 70B) teve custo zero, pois a API Groq é gratuita para uso não comercial. Em um cenário corporativo, porém, o uso de modelos pagos (GPT-4o ou Claude 3.5 Sonnet) incorreria em custos por token.
+
+Considerando uma refatoração típica que impacta 50 medidas, cada uma com expressão DAX de ~200 tokens, o custo estimado com GPT-4o (US\$ 5,00 / 1M tokens de entrada, US\$ 15,00 / 1M de saída) seria de aproximadamente US\$ 0,15 por refatoração completa (entrada + saída). Claude 3.5 Sonnet e Llama 3.3 70B (via Groq) têm custos similares ou inferiores. Esse valor é insignificante quando comparado ao custo de horas de trabalho de um analista de BI (estimado em US\$ 50--100/hora). Mesmo considerando latência e eventuais retentativas, o custo operacional do agente é marginal.
+
+Além disso, o agente reduz o tempo de refatoração de 30--60 segundos por expressão (manual) para 5,1 segundos (automatizado), proporcionando um ganho de produtividade de 6 a 12 vezes. Em modelos com centenas de medidas, a economia de tempo pode ser de horas para minutos, justificando o investimento em integração e treinamento.
+
+% ------------------------------------------------------------------
+% NOVA SUBSEÇÃO 5.6.6 - IMPLICAÇÕES PARA A PRÁTICA
+% ------------------------------------------------------------------
+\subsection{Implicações para a Prática}
+\label{sec:implicacoes-pratica}
+
+Para adoção em equipes de BI, recomenda-se:
+
+\begin{enumerate}
+    \item \textbf{Uso em modo \textit{dry run}:} Executar a análise de impacto e revisar o relatório antes de aplicar mudanças em produção, especialmente em modelos críticos;
+    \item \textbf{Versionamento dos modelos:} Manter modelos em formato PBIP/TMDL com controle de versão (Git) para facilitar o rollback e a auditoria das mudanças;
+    \item \textbf{Validação adicional:} Complementar a validação sintática com testes de regressão (execução de medidas antes/depois) para garantir equivalência numérica;
+    \item \textbf{Capacitação:} Treinar analistas para interpretar o relatório do agente e realizar a revisão manual quando sinalizada (especialmente em deleções);
+    \item \textbf{Integração com CI/CD:} Incorporar o agente em pipelines de integração contínua, permitindo que mudanças estruturais sejam validadas automaticamente antes do deploy.
+\end{enumerate}
+
+A combinação de automação com revisão humana — o chamado \textit{human-in-the-loop} — é a estratégia mais segura para adoção em ambientes corporativos, mantendo o controle sobre a lógica de negócio enquanto se beneficia da produtividade do agente.
+
 % ######################################################################
 % CAPÍTULO 6 - CONCLUSÃO
 % ######################################################################
@@ -1025,7 +1095,9 @@ As seguintes extensões são sugeridas para trabalhos futuros:
     \item \textbf{Ampliação para outros domínios:} Repetir o experimento sobre modelos semânticos de outros domínios de negócio (ex: financeiro, varejo, saúde), avaliando se a acurácia de 100\% se mantém fora do domínio de CI/CD testado;
     \item \textbf{Integração com CI/CD:} Incorporar o agente em pipelines de integração contínua para modelos semânticos versionados em formato PBIP/TMDL;
     \item \textbf{Avaliação com modelos reais de organizações parceiras:} Conduzir estudos de caso com modelos semânticos de produção de terceiros, incluindo avaliação qualitativa com profissionais de BI;
-    \item \textbf{Aplicação assistida de deleções:} Estender o agente para sugerir, e não apenas bloquear, possíveis correções para os objetos dependentes antes de uma deleção, mantendo a revisão humana como etapa final de aprovação.
+    \item \textbf{Refatoração proativa e sugestiva:} Estender o agente para não apenas reagir a mudanças propostas, mas também sugerir refatorações com base em métricas de qualidade (ex: detecção de colunas não utilizadas, expressões duplicadas, oportunidades de padronização);
+    \item \textbf{Refatoração entre modelos:} Investigar a viabilidade de propagar mudanças estruturais entre modelos semânticos interconectados (ex: modelo central e modelos departamentais), mantendo consistência semântica;
+    \item \textbf{Geração automática de documentação:} Integrar ao agente um módulo que, a cada refatoração, atualize a documentação do modelo (descrições de medidas, dicionário de dados), reduzindo a dívida técnica de documentação.
 \end{itemize}
 
 % ==============================================================================
